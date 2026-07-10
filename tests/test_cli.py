@@ -1,13 +1,13 @@
 import pytest
 from typer.testing import CliRunner
-from anamnesis.cli import app
+from mnemosyne.cli import app
 
 runner = CliRunner()
 
 def test_cli_version():
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "Anamnesis version" in result.stdout
+    assert "Mnemosyne version" in result.stdout
 
 def test_cli_help():
     result = runner.invoke(app, ["--help"])
@@ -25,7 +25,7 @@ def test_cli_help():
 def test_cli_config():
     result_show = runner.invoke(app, ["config", "show"])
     assert result_show.exit_code == 0
-    assert "Anamnesis Configuration Dashboard" in result_show.stdout
+    assert "Mnemosyne Configuration Dashboard" in result_show.stdout
 
     result_set = runner.invoke(app, ["config", "set-cloud-key", "test-cognee-key-123"])
     assert result_set.exit_code == 0

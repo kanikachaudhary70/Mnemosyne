@@ -11,14 +11,14 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from anamnesis import __version__
-from anamnesis.config import load_config, save_config, find_project_root
-from anamnesis.memory.client import MemoryClient
-from anamnesis.memory.schemas import BugFixMemory, MemoryType
-from anamnesis.memory.consolidator import MemoryConsolidator
-from anamnesis.git.inspector import GitInspector
-from anamnesis.git.hooks import HookManager
-from anamnesis.ui.formatter import (
+from mnemosyne import __version__
+from mnemosyne.config import load_config, save_config, find_project_root
+from mnemosyne.memory.client import MemoryClient
+from mnemosyne.memory.schemas import BugFixMemory, MemoryType
+from mnemosyne.memory.consolidator import MemoryConsolidator
+from mnemosyne.git.inspector import GitInspector
+from mnemosyne.git.hooks import HookManager
+from mnemosyne.ui.formatter import (
     render_banner,
     render_memory_warning,
     render_recall_response,
@@ -27,15 +27,15 @@ from anamnesis.ui.formatter import (
     render_timeline_results,
     render_search_strategy_badge,
 )
-from anamnesis.utils.llm_helper import summarize_diff_with_llm
+from mnemosyne.utils.llm_helper import summarize_diff_with_llm
 
 app = typer.Typer(
-    name="anamnesis",
+    name="mnemosyne",
     help="A CLI companion that gives your codebase a long-term memory using Cognee AI",
     add_completion=False,
 )
 hook_app = typer.Typer(help="Git hook execution subcommands")
-config_app = typer.Typer(help="Anamnesis & Cognee Cloud configuration subcommands")
+config_app = typer.Typer(help="Mnemosyne & Cognee Cloud configuration subcommands")
 app.add_typer(hook_app, name="hook")
 app.add_typer(config_app, name="config")
 
@@ -48,7 +48,7 @@ def main(
     version: bool = typer.Option(False, "--version", "-v", help="Show version and exit"),
 ):
     if version:
-        console.print(f"[bold cyan]Anamnesis[/bold cyan] version [bold white]{__version__}[/bold white]")
+        console.print(f"[bold cyan]Mnemosyne[/bold cyan] version [bold white]{__version__}[/bold white]")
         raise typer.Exit()
     if ctx.invoked_subcommand is None:
         render_banner()
@@ -65,11 +65,11 @@ def init_cmd(
 ):
     """
     [COGNEE PRIMITIVE: remember]
-    Initialize Anamnesis: ingest commit history, install git hooks, and set up Cognee graph.
+    Initialize Mnemosyne: ingest commit history, install git hooks, and set up Cognee graph.
     """
     render_banner()
     root = (repo_path or find_project_root()).resolve()
-    console.print(f"[bold cyan]Initializing Anamnesis in:[/bold cyan] [white]{root}[/white]")
+    console.print(f"[bold cyan]Initializing Mnemosyne in:[/bold cyan] [white]{root}[/white]")
 
     client = MemoryClient(root)
 
@@ -99,15 +99,15 @@ def init_cmd(
     save_config(config, root)
 
     console.print(
-        "\n[bold green]🎉 Anamnesis is ready![/bold green] "
+        "\n[bold green]🎉 Mnemosyne is ready![/bold green] "
         "Your codebase now has a long-term Cognee memory graph.\n"
     )
     console.print(
         "  [dim]Next steps:[/dim]\n"
-        "  • [cyan]anamnesis remember-bug[/cyan] — log a bug fix\n"
-        "  • [cyan]anamnesis ask \"<query>\"[/cyan] — query codebase memory\n"
-        "  • [cyan]anamnesis reflect[/cyan] — consolidate patterns into rules\n"
-        "  • [cyan]anamnesis mcp-serve[/cyan] — start MCP server for Claude Code\n"
+        "  • [cyan]mnemosyne remember-bug[/cyan] — log a bug fix\n"
+        "  • [cyan]mnemosyne ask \"<query>\"[/cyan] — query codebase memory\n"
+        "  • [cyan]mnemosyne reflect[/cyan] — consolidate patterns into rules\n"
+        "  • [cyan]mnemosyne mcp-serve[/cyan] — start MCP server for Claude Code\n"
     )
 
 
@@ -195,7 +195,7 @@ def remember_cmd(
 
     # Handle post-commit hook invocation
     if commit_hash and message:
-        from anamnesis.memory.schemas import CommitMemory
+        from mnemosyne.memory.schemas import CommitMemory
         file_list = [f.strip() for f in (files or "").split(",") if f.strip()]
         commit = CommitMemory(
             commit_hash=commit_hash,
@@ -228,7 +228,7 @@ def improve_cmd():
     """
     [COGNEE PRIMITIVE: improve / memify]
     Re-run graph enrichment with the CodeKnowledgeGraph schema on all stored memories.
-    Use this after upgrading Anamnesis to apply the new schema to existing memories.
+    Use this after upgrading Mnemosyne to apply the new schema to existing memories.
     """
     root = find_project_root()
     client = MemoryClient(root)
@@ -312,7 +312,7 @@ def timeline_cmd(
             results = asyncio.run(cognee.search(
                 query_text=query,
                 query_type=SearchType.TEMPORAL,
-                datasets=["anamnesis_codebase"],
+                datasets=["mnemosyne_codebase"],
                 top_k=top_k,
             ))
         render_timeline_results(results, fallback=False)
@@ -342,7 +342,7 @@ def feedback_cmd(
     sid = session_id or client.get_last_session_id()
 
     if not sid:
-        console.print("[yellow]No recent session found. Run 'anamnesis ask' first, then provide feedback.[/yellow]")
+        console.print("[yellow]No recent session found. Run 'mnemosyne ask' first, then provide feedback.[/yellow]")
         raise typer.Exit(1)
 
     if not client._init_cognee_if_needed():
@@ -468,17 +468,17 @@ def mcp_serve_cmd(
     port: int = typer.Option(8765, "--port", "-p", help="Port for sse/http transport"),
 ):
     """
-    Start the Anamnesis MCP server for Claude Code / Cursor integration.
+    Start the Mnemosyne MCP server for Claude Code / Cursor integration.
 
     Exposes codebase memory as native tools: recall_codebase_memory,
     remember_bug_fix, get_coding_rules, get_memory_status, forget_memory.
 
     Claude Desktop config (~/.claude/claude_desktop_config.json):
-      { "mcpServers": { "anamnesis": { "command": "anamnesis", "args": ["mcp-serve"] } } }
+      { "mcpServers": { "mnemosyne": { "command": "mnemosyne", "args": ["mcp-serve"] } } }
     """
-    from anamnesis.mcp_server import run_server
+    from mnemosyne.mcp_server import run_server
 
-    console.print(f"\n[bold cyan]🔌 Starting Anamnesis MCP Server[/bold cyan] (transport: {transport})")
+    console.print(f"\n[bold cyan]🔌 Starting Mnemosyne MCP Server[/bold cyan] (transport: {transport})")
     if transport != "stdio":
         console.print(f"  Listening on: [cyan]http://{host}:{port}/mcp[/cyan]")
     console.print("[dim]  Tools: recall_codebase_memory | remember_bug_fix | get_coding_rules | get_memory_status | forget_memory[/dim]\n")
@@ -502,7 +502,7 @@ def visualize_cmd(
     client = MemoryClient(root)
 
     if not client._init_cognee_if_needed():
-        console.print("[yellow]Cognee not initialized. Run 'anamnesis init' first.[/yellow]")
+        console.print("[yellow]Cognee not initialized. Run 'mnemosyne init' first.[/yellow]")
         raise typer.Exit(1)
 
     console.print("\n[bold cyan]🕸️  Building Memory Provenance Graph...[/bold cyan]")
@@ -527,7 +527,7 @@ def visualize_cmd(
                 # Fallback: generate a simple HTML visualization from local memories
                 graph_html = _generate_fallback_graph_html(memories)
 
-        out_path = output or (root / ".anamnesis" / "graph.html")
+        out_path = output or (root / ".mnemosyne" / "graph.html")
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(graph_html, encoding="utf-8")
 
@@ -539,7 +539,7 @@ def visualize_cmd(
 
     except Exception as e:
         console.print(f"[yellow]Graph visualization failed: {e}[/yellow]")
-        console.print("[dim]Try 'anamnesis status' for a text-based memory overview.[/dim]")
+        console.print("[dim]Try 'mnemosyne status' for a text-based memory overview.[/dim]")
 
 
 def _short_label(node_type: str, name: str, node_id: str) -> str:
@@ -608,7 +608,7 @@ def _render_provenance_html(graph_data: Any, memories: Optional[List] = None) ->
 
     nodes = []
     node_ids = set()
-    dataset_anchor = None  # id of the anamnesis_codebase dataset, to hang memories off
+    dataset_anchor = None  # id of the mnemosyne_codebase dataset, to hang memories off
     for n in nodes_raw:
         nid = _attr(n, "id")
         if nid is None:
@@ -617,7 +617,7 @@ def _render_provenance_html(graph_data: Any, memories: Optional[List] = None) ->
         props = _attr(n, "properties", {}) or {}
         ntype = props.get("type", "node")
         name = props.get("name") or props.get("text") or nid
-        if ntype == "Dataset" and props.get("name") == "anamnesis_codebase":
+        if ntype == "Dataset" and props.get("name") == "mnemosyne_codebase":
             dataset_anchor = nid
         nodes.append({
             "id": nid,
@@ -664,7 +664,7 @@ def _render_provenance_html(graph_data: Any, memories: Optional[List] = None) ->
     if not nodes:
         # Unexpected shape — show it readably rather than a raw repr blob.
         return f"""<!DOCTYPE html>
-<html><head><title>Anamnesis Memory Provenance</title>
+<html><head><title>Mnemosyne Memory Provenance</title>
 <style>body{{background:#0d1117;color:#c9d1d9;font-family:monospace;padding:20px}}</style>
 </head><body><h2>Memory Provenance (raw)</h2><pre>{graph_data}</pre></body></html>"""
 
@@ -686,7 +686,7 @@ _GRAPH_NODE_COLORS = {
     "User": "#ffa657", "Dataset": "#f0883e", "Session": "#a371f7",
     "TextDocument": "#58a6ff", "DocumentChunk": "#79c0ff",
     "Entity": "#3fb950", "EntityType": "#2ea043", "NodeSet": "#8b949e",
-    # Anamnesis memory types
+    # Mnemosyne memory types
     "root": "#ffa657", "category": "#ffa657",
     "bug_fix": "#f85149", "rule": "#3fb950",
     "commit": "#58a6ff", "documentation": "#d2a8ff",
@@ -714,7 +714,7 @@ def _d3_graph_html(nodes: List[dict], edges: List[dict], title: str) -> str:
     return f"""<!DOCTYPE html>
 <html>
 <head>
-  <title>Anamnesis — {title}</title>
+  <title>Mnemosyne — {title}</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {{ background: #0d1117; color: #c9d1d9; font-family: 'JetBrains Mono', monospace; margin: 0; overflow: hidden; }}
@@ -748,7 +748,7 @@ def _d3_graph_html(nodes: List[dict], edges: List[dict], title: str) -> str:
   </style>
 </head>
 <body>
-  <h1>🧠 Anamnesis — {title}</h1>
+  <h1>🧠 Mnemosyne — {title}</h1>
   <div class="legend">{legend_html}</div>
   <div class="hint">Click a node for details · drag to reposition · scroll to zoom</div>
   <svg></svg>
@@ -951,7 +951,7 @@ def set_llm_key_cmd(
 
 @config_app.command("show")
 def config_show_cmd():
-    """Display active Anamnesis configuration and Cognee Cloud connection status."""
+    """Display active Mnemosyne configuration and Cognee Cloud connection status."""
     root = find_project_root()
     config = load_config(root)
 
@@ -963,7 +963,7 @@ def config_show_cmd():
             return "[yellow]Not set[/yellow]"
         return f"[green]{k[:4]}...{k[-4:]}[/green]" if len(k) > 8 else "[green]Configured[/green]"
 
-    console.print("\n[bold cyan]⚙️  Anamnesis Configuration Dashboard[/bold cyan]\n")
+    console.print("\n[bold cyan]⚙️  Mnemosyne Configuration Dashboard[/bold cyan]\n")
     console.print(f"  Project Root:            [white]{root}[/white]")
     console.print(f"  Cognee Cloud API Key:    {mask_key(cognee_key)}")
     console.print(f"  Cognee Cloud Endpoint:   [cyan]{config.get('cognee_api_url', 'https://api.cognee.ai')}[/cyan]")
@@ -973,6 +973,86 @@ def config_show_cmd():
     console.print(f"  Reflection Threshold:    [cyan]{config.get('reflection_threshold', 3)} bug fixes[/cyan]")
     console.print(f"  Graph Schema:            [magenta]CodeKnowledgeGraph (typed entities)[/magenta]")
     console.print(f"  Search Strategy:         [magenta]GRAPH_COMPLETION + HYBRID_COMPLETION + CODING_RULES[/magenta]\n")
+
+
+@app.command("check-security")
+def check_security_cmd(
+    file_path: Optional[str] = typer.Option(None, "--file", "-f", help="Specific file path to scan"),
+):
+    """
+    Scan staged changes or a specific file for security vulnerabilities.
+    Leverages past security memories and rules to suggest fixes.
+    """
+    from mnemosyne.utils.security_scanner import SecurityScanner
+    
+    root = find_project_root()
+    client = MemoryClient(root)
+    scanner = SecurityScanner(client)
+
+    issues = []
+    
+    if file_path:
+        target = Path(file_path)
+        if not target.is_absolute():
+            target = root / target
+        
+        if not target.exists():
+            console.print(f"[red]Error: File {file_path} does not exist.[/red]")
+            raise typer.Exit(code=1)
+            
+        console.print(f"\n[bold cyan]🛡️  Scanning file: {file_path}...[/bold cyan]")
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Running security scan...", total=None)
+            issues = scanner.scan_file(target)
+    else:
+        # Scan staged changes
+        staged_diff = GitInspector.get_staged_diff(root)
+        if not staged_diff:
+            console.print("[yellow]No staged changes to scan. Please specify a file with --file, or stage changes with git add.[/yellow]")
+            return
+            
+        console.print("\n[bold cyan]🛡️  Scanning staged git diff...[/bold cyan]")
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            progress.add_task(description="Running security scan on staged diff...", total=None)
+            issues = scanner.scan_diff(staged_diff)
+
+    if not issues:
+        console.print("[bold green]✓ No security vulnerabilities detected![/bold green]\n")
+        return
+
+    console.print(f"\n[bold red]⚠️  DETECTED {len(issues)} SECURITY VULNERABILITIES:[/bold red]\n")
+    for issue in issues:
+        severity_colors = {
+            "low": "blue",
+            "medium": "yellow",
+            "high": "orange3",
+            "critical": "bold red"
+        }
+        color = severity_colors.get(issue.severity.lower(), "white")
+        
+        severity_badge = f"[{color}]{issue.severity.upper()}[/{color}]"
+        
+        title_line = f"[{color}]● {issue.vulnerability_type}[/{color}] - {severity_badge}"
+        if issue.line_number:
+            title_line += f" (Line {issue.line_number})"
+            
+        details = (
+            f"  [bold]Description:[/bold] {issue.description}\n"
+            f"  [bold]Proposed Fix:[/bold] {issue.proposed_fix}"
+        )
+        if issue.matching_memory_id:
+            details += f"\n  [bold]Matching past memory/rule:[/bold] [cyan]{issue.matching_memory_id}[/cyan]"
+            
+        console.print(Panel(details, title=title_line, border_style=color))
+    console.print()
 
 
 # ---------------------------------------------------------------------------
@@ -993,13 +1073,36 @@ def hook_run_cmd(
 
         if warnings and not silent:
             console.print("\n[bold yellow]════════════════════════════════════════════════════════════════[/bold yellow]")
-            console.print("[bold yellow]  ⚠️  ANAMNESIS PRE-COMMIT MEMORY WARNINGS[/bold yellow]")
+            console.print("[bold yellow]  ⚠️  MNEMOSYNE PRE-COMMIT MEMORY WARNINGS[/bold yellow]")
             console.print("[bold yellow]  Cognee Graph Search: GRAPH_COMPLETION + HYBRID_COMPLETION[/bold yellow]")
             console.print("[bold yellow]════════════════════════════════════════════════════════════════[/bold yellow]\n")
             for w in warnings:
                 console.print(render_memory_warning(w))
             console.print("[dim]Review past bug history above before completing this commit.[/dim]\n")
-            console.print("[dim]Run 'anamnesis feedback --helpful' or '--not-helpful' to improve future recalls.[/dim]\n")
+            console.print("[dim]Run 'mnemosyne feedback --helpful' or '--not-helpful' to improve future recalls.[/dim]\n")
+
+        # Run Security Scan on staged changes
+        from mnemosyne.git.inspector import GitInspector
+        staged_diff = GitInspector.get_staged_diff(root)
+        if staged_diff and not silent:
+            from mnemosyne.utils.security_scanner import SecurityScanner
+            from mnemosyne.memory.client import MemoryClient
+            client = MemoryClient(root)
+            scanner = SecurityScanner(client)
+            sec_issues = scanner.scan_diff(staged_diff)
+            if sec_issues:
+                console.print("\n[bold red]🛡️  🛡️  MNEMOSYNE AUTOMATIC SECURITY SCAN WARNINGS  🛡️  🛡️[/bold red]")
+                console.print("[bold red]════════════════════════════════════════════════════════════════[/bold red]\n")
+                for issue in sec_issues:
+                    severity_colors = {"low": "blue", "medium": "yellow", "high": "orange3", "critical": "bold red"}
+                    color = severity_colors.get(issue.severity.lower(), "white")
+                    severity_badge = f"[{color}]{issue.severity.upper()}[/{color}]"
+                    title = f"[{color}]● {issue.vulnerability_type}[/{color}] - {severity_badge}"
+                    details = f"  [bold]Description:[/bold] {issue.description}\n  [bold]Proposed Fix:[/bold] {issue.proposed_fix}"
+                    if issue.matching_memory_id:
+                        details += f"\n  [bold]Matching past memory/rule:[/bold] [cyan]{issue.matching_memory_id}[/cyan]"
+                    console.print(Panel(details, title=title, border_style=color))
+                console.print("\n[bold red]⚠️  Please review and resolve the security issues above before committing.[/bold red]\n")
 
     elif stage == "post-commit":
         HookManager.execute_post_commit_ingest(root, silent=silent)

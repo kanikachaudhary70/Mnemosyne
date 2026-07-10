@@ -11,7 +11,7 @@ except ImportError:
 
 DEFAULT_CONFIG = {
     "version": "0.1.0",
-    "storage_dir": ".anamnesis",
+    "storage_dir": ".mnemosyne",
     "hooks_installed": False,
     "max_context_diffs": 5,
     "reflection_threshold": 3,
@@ -36,21 +36,21 @@ DEFAULT_CONFIG = {
 }
 
 def find_project_root(start_path: Optional[Path] = None) -> Path:
-    """Find the root directory of the repository (where .git or .anamnesis resides)."""
+    """Find the root directory of the repository (where .git or .mnemosyne resides)."""
     current = (start_path or Path.cwd()).resolve()
     for dir_path in [current] + list(current.parents):
-        if (dir_path / ".git").exists() or (dir_path / ".anamnesis").exists():
+        if (dir_path / ".git").exists() or (dir_path / ".mnemosyne").exists():
             return dir_path
     return current
 
-def get_anamnesis_dir(repo_root: Optional[Path] = None) -> Path:
+def get_mnemosyne_dir(repo_root: Optional[Path] = None) -> Path:
     root = repo_root or find_project_root()
-    anamnesis_dir = root / ".anamnesis"
-    anamnesis_dir.mkdir(parents=True, exist_ok=True)
-    return anamnesis_dir
+    mnemosyne_dir = root / ".mnemosyne"
+    mnemosyne_dir.mkdir(parents=True, exist_ok=True)
+    return mnemosyne_dir
 
 def get_config_path(repo_root: Optional[Path] = None) -> Path:
-    return get_anamnesis_dir(repo_root) / "config.json"
+    return get_mnemosyne_dir(repo_root) / "config.json"
 
 def load_config(repo_root: Optional[Path] = None) -> Dict[str, Any]:
     config_path = get_config_path(repo_root)
@@ -127,12 +127,12 @@ def configure_llm_env(config: Optional[Dict[str, Any]] = None) -> str:
         # OpenAI-compatible endpoint.
         setdefault("OPENAI_API_KEY", "ollama")
         setdefault("OPENAI_BASE_URL", base)
-        setdefault("ANAMNESIS_LLM_MODEL", chat_model)
+        setdefault("MNEMOSYNE_LLM_MODEL", chat_model)
         return provider
 
     # Default: OpenAI (or any OPENAI_API_KEY-compatible provider)
     llm_key = os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY") or config.get("llm_api_key")
     if llm_key:
         setdefault("OPENAI_API_KEY", llm_key)
-    setdefault("ANAMNESIS_LLM_MODEL", config.get("llm_model") or "gpt-4o-mini")
+    setdefault("MNEMOSYNE_LLM_MODEL", config.get("llm_model") or "gpt-4o-mini")
     return provider

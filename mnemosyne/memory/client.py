@@ -5,8 +5,8 @@ import asyncio
 import logging
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-from anamnesis.config import get_anamnesis_dir, load_config
-from anamnesis.memory.schemas import (
+from mnemosyne.config import get_mnemosyne_dir, load_config
+from mnemosyne.memory.schemas import (
     MemoryRecord, MemoryType, BugFixMemory, CodeRuleMemory, CommitMemory,
     CodeKnowledgeGraph, CODE_ENTITY_EXTRACTION_PROMPT,
 )
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class MemoryClient:
     """
-    Client interface connecting Anamnesis CLI with Cognee memory primitives
+    Client interface connecting Mnemosyne CLI with Cognee memory primitives
     and local persistence metadata.
 
     Cognee Integration Strategy (Phase 2):
@@ -28,8 +28,8 @@ class MemoryClient:
     """
 
     def __init__(self, repo_root: Optional[Path] = None):
-        self.anamnesis_dir = get_anamnesis_dir(repo_root)
-        self.store_file = self.anamnesis_dir / "memories.json"
+        self.mnemosyne_dir = get_mnemosyne_dir(repo_root)
+        self.store_file = self.mnemosyne_dir / "memories.json"
         self._records: Dict[str, MemoryRecord] = {}
         self._load_records()
         self._cognee_initialized = False
@@ -61,15 +61,17 @@ class MemoryClient:
     # ------------------------------------------------------------------
 
     def _init_cognee_if_needed(self) -> bool:
+        if os.getenv("MNEMOSYNE_OFFLINE") == "1":
+            return False
         if self._cognee_initialized:
             return True
         try:
             import cognee
-            from anamnesis.config import load_config, configure_llm_env
+            from mnemosyne.config import load_config, configure_llm_env
             config = load_config()
 
-            # Set up local cognee data directory inside .anamnesis
-            cognee_data_dir = str(self.anamnesis_dir / "cognee_data")
+            # Set up local cognee data directory inside .mnemosyne
+            cognee_data_dir = str(self.mnemosyne_dir / "cognee_data")
             os.environ["COGNEE_DATA_DIR"] = cognee_data_dir
 
             # Cognee Cloud (optional) configuration
@@ -107,7 +109,7 @@ class MemoryClient:
         still populated.
         """
         import cognee
-        from anamnesis.config import load_config
+        from mnemosyne.config import load_config
         config = load_config()
         await cognee.add(content, dataset_name=dataset)
 
@@ -164,7 +166,7 @@ class MemoryClient:
             graph_results = await cognee.search(
                 query_text=enhanced_query,
                 query_type=SearchType.GRAPH_COMPLETION,
-                datasets=["anamnesis_codebase"],
+                datasets=["mnemosyne_codebase"],
                 top_k=top_k,
                 neighborhood_depth=2,
                 only_context=True,
@@ -183,7 +185,7 @@ class MemoryClient:
             hybrid_results = await cognee.search(
                 query_text=enhanced_query,
                 query_type=SearchType.HYBRID_COMPLETION,
-                datasets=["anamnesis_codebase"],
+                datasets=["mnemosyne_codebase"],
                 top_k=top_k,
                 only_context=True,
                 session_id=session_id,
@@ -204,7 +206,7 @@ class MemoryClient:
                 rule_results = await cognee.search(
                     query_text=enhanced_query,
                     query_type=SearchType.CODING_RULES,
-                    datasets=["anamnesis_codebase", "anamnesis_rules"],
+                    datasets=["mnemosyne_codebase", "mnemosyne_rules"],
                     top_k=top_k,
                 )
                 if rule_results:
@@ -399,7 +401,7 @@ class MemoryClient:
             try:
                 asyncio.run(self._cognee_add_and_cognify(
                     content=content,
-                    dataset="anamnesis_codebase",
+                    dataset="mnemosyne_codebase",
                     use_temporal=True,  # Track bug pattern evolution over time
                 ))
                 logger.debug(f"Bug {mem_id} ingested into Cognee graph with CodeKnowledgeGraph schema")
@@ -421,7 +423,7 @@ class MemoryClient:
         if count > 0 and count % threshold == 0:
             logger.debug(f"Auto-reflection triggered at {count} bug fixes (threshold={threshold})")
             try:
-                from anamnesis.memory.consolidator import MemoryConsolidator
+                from mnemosyne.memory.consolidator import MemoryConsolidator
                 consolidator = MemoryConsolidator(self)
                 consolidator.reflect()
             except Exception as e:
@@ -450,7 +452,7 @@ class MemoryClient:
         if self._init_cognee_if_needed():
             try:
                 import cognee
-                asyncio.run(cognee.add(content, dataset_name="anamnesis_codebase"))
+                asyncio.run(cognee.add(content, dataset_name="mnemosyne_codebase"))
             except Exception as e:
                 logger.debug(f"Cognee commit ingestion failed: {e}")
 
@@ -479,7 +481,7 @@ class MemoryClient:
             try:
                 asyncio.run(self._cognee_add_and_cognify(
                     content=content,
-                    dataset="anamnesis_rules",
+                    dataset="mnemosyne_rules",
                     use_temporal=False,
                 ))
             except Exception as e:
@@ -513,7 +515,7 @@ class MemoryClient:
             try:
                 asyncio.run(self._cognee_add_and_cognify(
                     content=mem_text,
-                    dataset="anamnesis_codebase",
+                    dataset="mnemosyne_codebase",
                     use_temporal=False,
                 ))
             except Exception as e:
@@ -566,7 +568,7 @@ class MemoryClient:
         if self._init_cognee_if_needed():
             try:
                 import cognee
-                from anamnesis.config import load_config
+                from mnemosyne.config import load_config
                 config = load_config()
                 if hasattr(cognee, "memify"):
                     asyncio.run(cognee.memify())
@@ -575,7 +577,7 @@ class MemoryClient:
                 if config.get("use_custom_graph_schema", False):
                     try:
                         asyncio.run(cognee.cognify(
-                            datasets=["anamnesis_codebase"],
+                            datasets=["mnemosyne_codebase"],
                             graph_model=CodeKnowledgeGraph,
                             custom_prompt=CODE_ENTITY_EXTRACTION_PROMPT,
                             temporal_cognify=config.get("use_temporal_cognify", False),
@@ -583,7 +585,7 @@ class MemoryClient:
                         return True
                     except Exception as e:
                         logger.debug(f"Custom-schema improve failed ({e}); using default cognify")
-                asyncio.run(cognee.cognify(datasets=["anamnesis_codebase"]))
+                asyncio.run(cognee.cognify(datasets=["mnemosyne_codebase"]))
                 return True
             except Exception as e:
                 logger.debug(f"Cognee improve failed: {e}")

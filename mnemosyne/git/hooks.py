@@ -5,32 +5,32 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any, List
-from anamnesis.git.inspector import GitInspector
-from anamnesis.memory.client import MemoryClient
-from anamnesis.config import load_config, save_config, find_project_root
+from mnemosyne.git.inspector import GitInspector
+from mnemosyne.memory.client import MemoryClient
+from mnemosyne.config import load_config, save_config, find_project_root
 
 logger = logging.getLogger(__name__)
 
 PRE_COMMIT_SCRIPT = """#!/usr/bin/env bash
-# Anamnesis Git Pre-Commit Hook
+# Mnemosyne Git Pre-Commit Hook
 # Queries Cognee knowledge graph for related past bugs before each commit.
 
-if command -v anamnesis > /dev/null 2>&1; then
-    anamnesis hook run --stage pre-commit
+if command -v mnemosyne > /dev/null 2>&1; then
+    mnemosyne hook run --stage pre-commit
 else
-    # Fallback to python execution if anamnesis CLI is in virtualenv
-    python -m anamnesis.cli hook run --stage pre-commit 2>/dev/null || true
+    # Fallback to python execution if mnemosyne CLI is in virtualenv
+    python -m mnemosyne.cli hook run --stage pre-commit 2>/dev/null || true
 fi
 """
 
 POST_COMMIT_SCRIPT = """#!/usr/bin/env bash
-# Anamnesis Git Post-Commit Hook
+# Mnemosyne Git Post-Commit Hook
 # Auto-ingests commit metadata into Cognee knowledge graph after each commit.
 
-if command -v anamnesis > /dev/null 2>&1; then
-    anamnesis hook run --stage post-commit --silent 2>/dev/null || true
+if command -v mnemosyne > /dev/null 2>&1; then
+    mnemosyne hook run --stage post-commit --silent 2>/dev/null || true
 else
-    python -m anamnesis.cli hook run --stage post-commit --silent 2>/dev/null || true
+    python -m mnemosyne.cli hook run --stage post-commit --silent 2>/dev/null || true
 fi
 """
 
@@ -73,7 +73,7 @@ class HookManager:
         Install the post-commit hook that auto-ingests commits into Cognee.
 
         This closes the feedback loop: every commit is automatically stored
-        in codebase memory without requiring manual 'anamnesis remember'.
+        in codebase memory without requiring manual 'mnemosyne remember'.
         """
         hooks_dir = cls.get_hooks_dir(repo_root)
         if not hooks_dir:
@@ -177,7 +177,7 @@ class HookManager:
         Auto-ingests the just-committed changes into Cognee knowledge graph.
 
         Runs silently after every git commit so codebase memory stays current
-        without requiring manual 'anamnesis remember' commands.
+        without requiring manual 'mnemosyne remember' commands.
         """
         root = repo_root or find_project_root()
         client = MemoryClient(root)

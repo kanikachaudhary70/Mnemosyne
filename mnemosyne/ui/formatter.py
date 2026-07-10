@@ -7,7 +7,7 @@ from rich.style import Style
 from rich.markdown import Markdown
 from rich.columns import Columns
 from rich.rule import Rule
-from anamnesis.memory.schemas import MemoryRecord, MemoryType
+from mnemosyne.memory.schemas import MemoryRecord, MemoryType
 
 console = Console()
 
@@ -98,7 +98,7 @@ def render_recall_response(query: str, records: List[MemoryRecord]) -> None:
     if not records:
         console.print(Panel(
             "[dim]No relevant nodes found in Cognee knowledge graph.\n"
-            "Try: anamnesis remember-bug — to add memories first.[/dim]",
+            "Try: mnemosyne remember-bug — to add memories first.[/dim]",
             border_style="dim",
         ))
         return
@@ -129,7 +129,7 @@ def render_recall_response(query: str, records: List[MemoryRecord]) -> None:
 
     console.print(
         f"\n[dim]Found {len(records)} result(s). "
-        "Run 'anamnesis feedback --helpful' to improve future results.[/dim]\n"
+        "Run 'mnemosyne feedback --helpful' to improve future results.[/dim]\n"
     )
 
 
@@ -141,7 +141,7 @@ def render_rules_table(rules: List[MemoryRecord]) -> None:
     if not rules:
         console.print(Panel(
             "[dim]No consolidated rules yet.\n"
-            "Run 'anamnesis reflect' to execute cognee.memify() + CODING_RULES analysis.[/dim]",
+            "Run 'mnemosyne reflect' to execute cognee.memify() + CODING_RULES analysis.[/dim]",
             border_style="dim",
         ))
         return
@@ -178,7 +178,7 @@ def render_rules_table(rules: List[MemoryRecord]) -> None:
 
 def render_status_dashboard(stats: Dict[str, Any]) -> None:
     stats_table = Table(
-        title="📊 Anamnesis × Cognee Dashboard",
+        title="📊 Mnemosyne × Cognee Dashboard",
         border_style="magenta",
         show_lines=False,
     )

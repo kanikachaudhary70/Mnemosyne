@@ -146,7 +146,7 @@ class CodeKnowledgeGraph(BaseModel):
 
     Example:
         await cognee.cognify(
-            datasets=["anamnesis_codebase"],
+            datasets=["mnemosyne_codebase"],
             graph_model=CodeKnowledgeGraph,
             custom_prompt=CODE_ENTITY_EXTRACTION_PROMPT,
             temporal_cognify=True,

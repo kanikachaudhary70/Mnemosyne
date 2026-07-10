@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 import git
-from anamnesis.memory.schemas import CommitMemory
+from mnemosyne.memory.schemas import CommitMemory
 
 class GitInspector:
     """Utility class to inspect git commits, staged diffs, and repository state."""

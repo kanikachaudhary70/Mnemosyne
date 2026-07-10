@@ -1,4 +1,4 @@
-# Anamnesis
+# Mnemosyne
 
 > **A CLI companion that gives your codebase a long-term memory, so every AI-assisted coding session starts smart instead of starting blank.**
 
@@ -11,7 +11,7 @@
 
 ## 🏆 Built for the Cognee AI Hackathon
 
-Anamnesis is a **codebase memory infrastructure showcase** built on **[Cognee AI](https://cognee.ai)**. Rather than treating Cognee as a basic vector database, it exercises the full **Cognee Memory Lifecycle** — and runs **100% locally and free** using [Ollama](https://ollama.com) (no paid API keys required).
+Mnemosyne is a **codebase memory infrastructure showcase** built on **[Cognee AI](https://cognee.ai)**. Rather than treating Cognee as a basic vector database, it exercises the full **Cognee Memory Lifecycle** — and runs **100% locally and free** using [Ollama](https://ollama.com) (no paid API keys required).
 
 ```
                   ┌───────────────────────────────────────────────┐
@@ -29,11 +29,11 @@ Anamnesis is a **codebase memory infrastructure showcase** built on **[Cognee AI
 
 | Cognee Primitive | Implementation | CLI Command |
 |---|---|---|
-| **`remember()`** | Ingests git commit diffs, bug root causes, and architecture decisions into the graph | `anamnesis remember-bug`<br>`anamnesis remember` |
-| **`recall()`** | Hybrid graph traversal + vector search to surface contextual warnings | `anamnesis ask`<br>`anamnesis timeline`<br>Git pre-commit hook |
-| **`memify()`** | Clusters near-duplicate bug reports into generalized team coding conventions | `anamnesis reflect`<br>`anamnesis rules` |
-| **`improve()`** | Re-indexes graph relationships, adapts edge weights, and enriches nodes | `anamnesis improve`<br>`anamnesis feedback` |
-| **`forget()`** | Decays stale memory nodes when code is deleted or refactored | `anamnesis forget` |
+| **`remember()`** | Ingests git commit diffs, bug root causes, and architecture decisions into the graph | `mnemosyne remember-bug`<br>`mnemosyne remember` |
+| **`recall()`** | Hybrid graph traversal + vector search to surface contextual warnings | `mnemosyne ask`<br>`mnemosyne timeline`<br>Git pre-commit hook |
+| **`memify()`** | Clusters near-duplicate bug reports into generalized team coding conventions | `mnemosyne reflect`<br>`mnemosyne rules` |
+| **`improve()`** | Re-indexes graph relationships, adapts edge weights, and enriches nodes | `mnemosyne improve`<br>`mnemosyne feedback` |
+| **`forget()`** | Decays stale memory nodes when code is deleted or refactored | `mnemosyne forget` |
 
 ---
 
@@ -47,7 +47,7 @@ The true knowledge of a codebase — *why architectural decisions were made, wha
 
 ## 2. The Idea: Codebase Memory Infrastructure
 
-**Anamnesis** sits next to your standard git workflow and builds a **persistent, evolving knowledge graph** of your codebase using **[Cognee AI](https://cognee.ai)**. It watches git commits, ingests bug fixes and their root causes, and surfaces contextual warnings before a commit is finalized.
+**Mnemosyne** sits next to your standard git workflow and builds a **persistent, evolving knowledge graph** of your codebase using **[Cognee AI](https://cognee.ai)**. It watches git commits, ingests bug fixes and their root causes, and surfaces contextual warnings before a commit is finalized.
 
 It exercises the full **Cognee Memory Lifecycle**:
 1. **Remember** — Ingest git history, bug root causes, and architectural decisions into graph/vector memory.
@@ -68,7 +68,7 @@ It exercises the full **Cognee Memory Lifecycle**:
                     │ Git hook (.git/hooks/pre-commit)
                     ▼
 ┌───────────────────────────────────────┐
-│          Anamnesis CLI (Python)       │
+│          Mnemosyne CLI (Python)       │
 │    Typer commands + Rich UI + MCP     │
 │  init · remember-bug · ask · reflect  │
 │  visualize · timeline · forget · …    │
@@ -90,7 +90,7 @@ It exercises the full **Cognee Memory Lifecycle**:
 └───────────────────┘  └───────────────────┘
 ```
 
-**Local JSON store as ground truth.** Every memory is also written to `.anamnesis/memories.json`. If Cognee/embeddings are ever unavailable, recall gracefully falls back to local keyword scoring, so the CLI never hard-fails.
+**Local JSON store as ground truth.** Every memory is also written to `.mnemosyne/memories.json`. If Cognee/embeddings are ever unavailable, recall gracefully falls back to local keyword scoring, so the CLI never hard-fails.
 
 ---
 
@@ -100,11 +100,11 @@ It exercises the full **Cognee Memory Lifecycle**:
 - **Python 3.10+** and **Git**
 - **[Ollama](https://ollama.com/download)** for the default local, free LLM + embeddings backend
 
-### Step 1 — Install Anamnesis
+### Step 1 — Install Mnemosyne
 
 ```bash
-git clone https://github.com/your-username/Anamnesis.git
-cd Anamnesis
+git clone https://github.com/your-username/Mnemosyne.git
+cd Mnemosyne
 
 python3 -m venv .venv
 source .venv/bin/activate
@@ -114,7 +114,7 @@ pip install -e .
 
 ### Step 2 — Set up the local LLM backend (Ollama)
 
-Anamnesis defaults to running everything locally and free via Ollama — no OpenAI key needed.
+Mnemosyne defaults to running everything locally and free via Ollama — no OpenAI key needed.
 
 ```bash
 # 1. Install Ollama:  https://ollama.com/download   (or: brew install ollama)
@@ -131,28 +131,28 @@ ollama pull nomic-embed-text   # embeddings
 ### Step 3 — Initialize in your target repo
 
 ```bash
-anamnesis init
+mnemosyne init
 ```
 *Ingests recent git commit history into Cognee memory and installs the Git pre-commit hook.*
 
 ### Step 4 — Try it
 
 ```bash
-anamnesis remember-bug \
+mnemosyne remember-bug \
   --file "services/user_service.py" \
   --title "NullPointerException in fetch_user_profile" \
   --cause "Unchecked response.json() on 204 status" \
   --fix "Added HTTP status check and defensive .get() chaining"
 
-anamnesis ask "null pointer api response"
-anamnesis visualize
+mnemosyne ask "null pointer api response"
+mnemosyne visualize
 ```
 
 ---
 
 ## 5. Configuration
 
-Configuration lives in `.anamnesis/config.json` (per-repo) with environment overrides from `.env`. **Environment variables always win**, so `.env` overrides `config.json`.
+Configuration lives in `.mnemosyne/config.json` (per-repo) with environment overrides from `.env`. **Environment variables always win**, so `.env` overrides `config.json`.
 
 ### LLM / embedding backend
 
@@ -167,7 +167,7 @@ Configuration lives in `.anamnesis/config.json` (per-repo) with environment over
 | `use_temporal_cognify` | `false` | Track bug-pattern evolution over time (needs a strong LLM) |
 | `reflection_threshold` | `3` | Auto-consolidate rules after every N bug fixes |
 
-> **Why the graph flags default off:** the typed `CodeFile → Function → BugPattern → Fix` schema and temporal event extraction require an LLM that reliably emits strict structured JSON. Small local models (e.g. `llama3.2:3b`) can't, so Anamnesis uses Cognee's robust built-in extraction by default and gracefully falls back if the typed schema fails. Turn both flags on with a strong model (OpenAI, or a large local model) to get the richer typed graph.
+> **Why the graph flags default off:** the typed `CodeFile → Function → BugPattern → Fix` schema and temporal event extraction require an LLM that reliably emits strict structured JSON. Small local models (e.g. `llama3.2:3b`) can't, so Mnemosyne uses Cognee's robust built-in extraction by default and gracefully falls back if the typed schema fails. Turn both flags on with a strong model (OpenAI, or a large local model) to get the richer typed graph.
 
 ### Example `.env` (local Ollama — the default)
 
@@ -194,119 +194,119 @@ OPENAI_BASE_URL=http://localhost:11434/v1
 
 ```bash
 # Use a paid OpenAI key instead of Ollama
-anamnesis config set-llm-key <your_openai_key>   # then set llm_provider=openai
+mnemosyne config set-llm-key <your_openai_key>   # then set llm_provider=openai
 
 # Team-wide shared memory via Cognee Cloud (platform.cognee.ai)
-anamnesis config set-cloud-key <your_cognee_api_key>
+mnemosyne config set-cloud-key <your_cognee_api_key>
 ```
 
 ---
 
 ## 6. CLI Command Reference
 
-### `anamnesis init`
+### `mnemosyne init`
 Ingests commit history into Cognee memory and installs `.git/hooks/pre-commit`.
 ```bash
-anamnesis init
+mnemosyne init
 ```
 
-### `anamnesis remember-bug`
+### `mnemosyne remember-bug`
 Logs a bug fix, its root cause, and fix details into codebase memory. Supports explicit flags or auto-summarization from the staged `git diff`.
 ```bash
-anamnesis remember-bug --file services/user_service.py \
+mnemosyne remember-bug --file services/user_service.py \
   --title "Unchecked API crash" --cause "Missing null check" --fix "Added guard clause"
 
-anamnesis remember-bug --auto   # summarize the staged diff
+mnemosyne remember-bug --auto   # summarize the staged diff
 ```
 
-### `anamnesis remember`
+### `mnemosyne remember`
 Ingests a general document, ADR, or PR note into the knowledge graph.
 ```bash
-anamnesis remember "Use the service layer for DB queries" \
+mnemosyne remember "Use the service layer for DB queries" \
   --content "All direct DB queries must pass through services." --file services/base.py
 ```
 
-### `anamnesis ask`
+### `mnemosyne ask`
 Query codebase memory in natural language (GRAPH_COMPLETION + HYBRID_COMPLETION + CODING_RULES). Shows which strategy found each result.
 ```bash
-anamnesis ask "Why do we validate external API responses in the service layer?"
+mnemosyne ask "Why do we validate external API responses in the service layer?"
 ```
 
-### `anamnesis timeline`
+### `mnemosyne timeline`
 Temporal recall — shows how bug patterns evolved over time (requires `use_temporal_cognify`; falls back to local timestamp ordering otherwise).
 ```bash
-anamnesis timeline "recurring null pointer bugs" --top-k 10
+mnemosyne timeline "recurring null pointer bugs" --top-k 10
 ```
 
-### `anamnesis reflect`
+### `mnemosyne reflect`
 Clusters related bug reports across files into consolidated team rules (`memify`).
 ```bash
-anamnesis reflect
+mnemosyne reflect
 ```
 
-### `anamnesis rules`
+### `mnemosyne rules`
 Displays a Rich table of all active consolidated team rules and their provenance links.
 ```bash
-anamnesis rules
+mnemosyne rules
 ```
 
-### `anamnesis improve`
+### `mnemosyne improve`
 Post-ingestion graph enrichment, edge-weight adaptation, and node optimization.
 ```bash
-anamnesis improve
+mnemosyne improve
 ```
 
-### `anamnesis feedback`
+### `mnemosyne feedback`
 Rate the last recall result to improve future ranking (Cognee truth-subspace reranking).
 ```bash
-anamnesis feedback --helpful
-anamnesis feedback --not-helpful
+mnemosyne feedback --helpful
+mnemosyne feedback --not-helpful
 ```
 
-### `anamnesis forget`
+### `mnemosyne forget`
 Decays or removes stale memory by ID or file path.
 ```bash
-anamnesis forget mem_bug_8cec331b
-anamnesis forget services/user_service.py
+mnemosyne forget mem_bug_8cec331b
+mnemosyne forget services/user_service.py
 ```
 
-### `anamnesis visualize`
+### `mnemosyne visualize`
 Opens an **interactive provenance graph** in your browser (D3 force graph). Merges the Cognee provenance graph (User → Dataset → File → Session) with your local memory records, so **clicking any node opens a detail panel** with the bug's type, root cause, fix, and file. Nodes use short tags; the graph supports zoom, pan, and drag.
 ```bash
-anamnesis visualize                 # open in browser
-anamnesis visualize -o graph.html   # save to a file instead
+mnemosyne visualize                 # open in browser
+mnemosyne visualize -o graph.html   # save to a file instead
 ```
 
-### `anamnesis status`
+### `mnemosyne status`
 Dashboard of memory statistics, active rule counts, and Git hook status.
 ```bash
-anamnesis status
+mnemosyne status
 ```
 
-### `anamnesis config`
+### `mnemosyne config`
 Manage LLM provider and Cognee Cloud settings.
 ```bash
-anamnesis config show                       # active configuration dashboard
-anamnesis config set-llm-key <openai_key>   # configure a paid LLM key
-anamnesis config set-cloud-key <cognee_key> # configure Cognee Cloud
+mnemosyne config show                       # active configuration dashboard
+mnemosyne config set-llm-key <openai_key>   # configure a paid LLM key
+mnemosyne config set-cloud-key <cognee_key> # configure Cognee Cloud
 ```
 
-### `anamnesis mcp-serve`
-Runs Anamnesis as an **MCP server** so Claude Code / Cursor can use codebase memory as native tools (`recall_codebase_memory`, `remember_bug_fix`, `get_coding_rules`, `get_memory_status`, `forget_memory`).
+### `mnemosyne mcp-serve`
+Runs Mnemosyne as an **MCP server** so Claude Code / Cursor can use codebase memory as native tools (`recall_codebase_memory`, `remember_bug_fix`, `get_coding_rules`, `get_memory_status`, `forget_memory`).
 ```bash
-anamnesis mcp-serve                       # stdio (default)
-anamnesis mcp-serve -t http --port 8765   # HTTP transport
+mnemosyne mcp-serve                       # stdio (default)
+mnemosyne mcp-serve -t http --port 8765   # HTTP transport
 ```
 Claude Desktop config (`~/.claude/claude_desktop_config.json`):
 ```json
-{ "mcpServers": { "anamnesis": { "command": "anamnesis", "args": ["mcp-serve"] } } }
+{ "mcpServers": { "mnemosyne": { "command": "mnemosyne", "args": ["mcp-serve"] } } }
 ```
 
 ---
 
 ## 7. Visualizing the Memory Graph
 
-`anamnesis visualize` renders an interactive graph of everything Anamnesis knows:
+`mnemosyne visualize` renders an interactive graph of everything Mnemosyne knows:
 
 - **Nodes** — `user`, `dataset`, `doc`, `session` (from Cognee provenance) plus your `bug_fix`, `rule`, `commit`, and `documentation` memories, color-coded by type with a legend.
 - **Click a node** → a side panel shows structured detail:
@@ -319,6 +319,28 @@ Claude Desktop config (`~/.claude/claude_desktop_config.json`):
 - **Interactions** — scroll to zoom, drag the background to pan, drag nodes to reposition.
 
 The page is a self-contained HTML file, so you can also commit or share `graph.html`.
+
+---
+
+## 7. Web Dashboard & Security Scanner Agent
+
+Mnemosyne features a gorgeous, light-pink themed **Glassmorphic Web Dashboard** that hosts the local memory engine and security scanning capabilities in a user-friendly browser interface.
+
+### Running the Web Dashboard
+
+To launch the dashboard server locally:
+```bash
+python -m uvicorn api.index:app --host 127.0.0.1 --port 8000 --reload
+```
+Then, open your web browser and navigate to:
+👉 **`http://127.0.0.1:8000`**
+
+### Features:
+1. **Interactive Memory Graph**: Powered by D3.js, visualizing your files, bug fixes, consolidated rules, and commit history. Clicking any node opens a details drawer.
+2. **Remember Bug Ingestor**: Log bug titles, functions, file paths, root causes, and fixes directly into the memory graph.
+3. **Recall Search**: Query your codebase memory in natural language using semantic search.
+4. **Discovered Coding Rules**: Clusters bug fixes and generates generalized coding guidelines using our consolidator pipeline.
+5. **Security Scan Agent**: Analyze staged git diffs or raw files for security vulnerabilities (e.g. hardcoded secrets, SQL injection, eval blocks, subprocess command injection). The scanner references **past bug fixes in memory** to detect if you are repeating previous coding mistakes!
 
 ---
 
@@ -336,12 +358,12 @@ It ingests baseline history, logs a bug (`remember`), fires a pre-commit warning
 
 ## 9. How It Works (Internals)
 
-- **`anamnesis/cli.py`** — Typer CLI + Rich UI, including the D3 graph renderer for `visualize`.
-- **`anamnesis/config.py`** — config loading and `configure_llm_env()`, which wires Cognee/LiteLLM and the OpenAI SDK to the chosen provider (Ollama by default).
-- **`anamnesis/memory/client.py`** — `MemoryClient`: the Cognee integration and local JSON store, with robust cognify fallback for weak local models.
-- **`anamnesis/memory/consolidator.py`** — bug-pattern clustering into team rules.
-- **`anamnesis/git/`** — commit inspection and pre-commit hook installation.
-- **`anamnesis/mcp_server.py`** — MCP server exposing memory as tools.
+- **`mnemosyne/cli.py`** — Typer CLI + Rich UI, including the D3 graph renderer for `visualize`.
+- **`mnemosyne/config.py`** — config loading and `configure_llm_env()`, which wires Cognee/LiteLLM and the OpenAI SDK to the chosen provider (Ollama by default).
+- **`mnemosyne/memory/client.py`** — `MemoryClient`: the Cognee integration and local JSON store, with robust cognify fallback for weak local models.
+- **`mnemosyne/memory/consolidator.py`** — bug-pattern clustering into team rules.
+- **`mnemosyne/git/`** — commit inspection and pre-commit hook installation.
+- **`mnemosyne/mcp_server.py`** — MCP server exposing memory as tools.
 
 ---
 

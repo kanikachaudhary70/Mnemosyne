@@ -1,5 +1,5 @@
 """
-Anamnesis × Cognee — Hackathon Demo Script
+Mnemosyne × Cognee — Hackathon Demo Script
 ==========================================
 Demonstrates all 5 Cognee memory primitives with real, impressive capabilities:
   remember  → CodeKnowledgeGraph entity extraction + temporal tracking
@@ -11,7 +11,7 @@ Demonstrates all 5 Cognee memory primitives with real, impressive capabilities:
 Story: "The Tale of Null, the Recurring Bug"
 Two engineers, Alice and Bob, work on a Python API service.
 Alice fixes a null pointer. Bob makes the same mistake 3 days later.
-Anamnesis catches it before it ships. The team learns. The bug never recurs.
+Mnemosyne catches it before it ships. The team learns. The bug never recurs.
 """
 
 import os
@@ -28,11 +28,11 @@ from rich.table import Table
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(root_dir))
 
-from anamnesis.memory.client import MemoryClient
-from anamnesis.memory.schemas import BugFixMemory, MemoryType, CommitMemory
-from anamnesis.memory.consolidator import MemoryConsolidator
-from anamnesis.git.hooks import HookManager
-from anamnesis.ui.formatter import (
+from mnemosyne.memory.client import MemoryClient
+from mnemosyne.memory.schemas import BugFixMemory, MemoryType, CommitMemory
+from mnemosyne.memory.consolidator import MemoryConsolidator
+from mnemosyne.git.hooks import HookManager
+from mnemosyne.ui.formatter import (
     render_banner, render_memory_warning, render_recall_response,
     render_rules_table, render_status_dashboard, render_search_strategy_badge,
 )
@@ -62,7 +62,7 @@ def run_full_demo():
     # -----------------------------------------------------------------------
     render_banner()
     console.print(Panel(
-        "[bold cyan]ANAMNESIS × COGNEE — HACKATHON DEMO[/bold cyan]\n\n"
+        "[bold cyan]MNEMOSYNE × COGNEE — HACKATHON DEMO[/bold cyan]\n\n"
         "Demonstrating all [bold magenta]5 Cognee memory primitives[/bold magenta] "
         "with real knowledge graph capabilities:\n\n"
         " 1. [bold green]remember[/bold green]  → CodeKnowledgeGraph entity extraction (file→function→bug→rule nodes)\n"
@@ -72,8 +72,8 @@ def run_full_demo():
         " 5. [bold green]forget[/bold green]    → Graph pruning via cognee.prune.prune_data()\n\n"
         "[dim]Graph Schema: CodeKnowledgeGraph (typed nodes + semantic edges)[/dim]\n"
         "[dim]Story: Alice fixes a null pointer. Bob makes the same mistake 3 days later.\n"
-        "Anamnesis catches it before it ships. The team learns. The bug never recurs.[/dim]",
-        title="Welcome to Anamnesis",
+        "Mnemosyne catches it before it ships. The team learns. The bug never recurs.[/dim]",
+        title="Welcome to Mnemosyne",
         border_style="magenta",
     ))
 
@@ -84,7 +84,7 @@ def run_full_demo():
 
     console.print(
         "[dim]Day 1. Alice just fixed a null pointer in the user service.\n"
-        "She runs 'anamnesis remember-bug' to permanently store it.[/dim]\n"
+        "She runs 'mnemosyne remember-bug' to permanently store it.[/dim]\n"
     )
 
     client = MemoryClient(sample_dir)
@@ -108,7 +108,7 @@ def run_full_demo():
     )
 
     step("[bold cyan]Cognee primitive: remember()[/bold cyan]")
-    step("→ cognee.add(content, dataset_name='anamnesis_codebase')")
+    step("→ cognee.add(content, dataset_name='mnemosyne_codebase')")
     step("→ cognee.cognify(graph_model=CodeKnowledgeGraph, temporal_cognify=True)")
     step("→ LLM extracts: CodeFile → Function → BugPattern → Fix nodes")
     step("→ Edges: CONTAINS, CAUSED_BY, FIXED_BY, GENERALIZES_TO")
@@ -182,7 +182,7 @@ def run_full_demo():
 
     console.print(
         "[dim]Bob is about to commit a new feature touching payment_service.py.\n"
-        "The pre-commit hook fires. Anamnesis queries the knowledge graph...[/dim]\n"
+        "The pre-commit hook fires. Mnemosyne queries the knowledge graph...[/dim]\n"
     )
 
     step("[bold cyan]Pre-commit hook triggers:[/bold cyan]")
@@ -200,7 +200,7 @@ def run_full_demo():
     )
 
     if recalled:
-        console.print("[bold yellow]⚠️  ANAMNESIS PRE-COMMIT WARNINGS FIRED:[/bold yellow]\n")
+        console.print("[bold yellow]⚠️  MNEMOSYNE PRE-COMMIT WARNINGS FIRED:[/bold yellow]\n")
         for rec in recalled[:2]:
             console.print(render_memory_warning(rec))
     else:
@@ -219,7 +219,7 @@ def run_full_demo():
     section("STEP 3 — memify: cognee.memify() + CODING_RULES Semantic Clustering")
 
     console.print(
-        "[dim]'anamnesis reflect' is called (or auto-triggered).\n"
+        "[dim]'mnemosyne reflect' is called (or auto-triggered).\n"
         "cognee.memify() builds cross-memory associations.\n"
         "SearchType.CODING_RULES retrieves discovered patterns.[/dim]\n"
     )
@@ -262,7 +262,7 @@ def run_full_demo():
     section("STEP 4 — improve: Temporal Graph + Schema Re-indexing")
 
     console.print(
-        "[dim]'anamnesis improve' re-runs cognify with the full CodeKnowledgeGraph\n"
+        "[dim]'mnemosyne improve' re-runs cognify with the full CodeKnowledgeGraph\n"
         "schema and temporal_cognify=True on all existing memories.[/dim]\n"
     )
 
@@ -281,7 +281,7 @@ def run_full_demo():
         "  [bold yellow]Pattern detected:[/bold yellow] 3 null-check failures in API layer over 8 days\n"
         "  [bold yellow]Root cause cluster:[/bold yellow] NullPointerException / KeyError / AttributeError\n"
         "  [bold yellow]Recommendation:[/bold yellow] Team-wide null-check convention (now in rules graph)\n\n"
-        "[dim]Use 'anamnesis timeline' to see this graph in the terminal.[/dim]",
+        "[dim]Use 'mnemosyne timeline' to see this graph in the terminal.[/dim]",
         title="📅 Temporal Knowledge Graph",
         border_style="cyan",
     ))
@@ -312,7 +312,7 @@ def run_full_demo():
     section("FINALE — MCP Server: Claude Code Integration")
 
     console.print(Panel(
-        "[bold cyan]'anamnesis mcp-serve'[/bold cyan] starts an MCP server that gives\n"
+        "[bold cyan]'mnemosyne mcp-serve'[/bold cyan] starts an MCP server that gives\n"
         "Claude Code / Cursor direct access to codebase memory as native tools:\n\n"
         "  [bold green]recall_codebase_memory[/bold green](query, file_path)\n"
         "    → Semantic graph search before writing code\n\n"
@@ -345,16 +345,16 @@ def run_full_demo():
 
     console.print()
     console.print(Panel(
-        "[bold green]✨ Anamnesis × Cognee Demo Complete![/bold green]\n\n"
+        "[bold green]✨ Mnemosyne × Cognee Demo Complete![/bold green]\n\n"
         "[bold white]5 Cognee primitives demonstrated:[/bold white]\n"
         "  remember  → [green]CodeKnowledgeGraph typed entity extraction ✓[/green]\n"
         "  recall    → [green]GRAPH_COMPLETION + HYBRID_COMPLETION + CODING_RULES ✓[/green]\n"
         "  memify    → [green]Semantic clustering (not 4 hardcoded buckets!) ✓[/green]\n"
         "  improve   → [green]Temporal knowledge graph + schema re-indexing ✓[/green]\n"
         "  forget    → [green]Graph pruning via cognee.prune.prune_data() ✓[/green]\n\n"
-        "[dim]Try: anamnesis visualize  →  D3.js interactive graph in browser[/dim]\n"
-        "[dim]Try: anamnesis timeline   →  temporal bug pattern evolution[/dim]\n"
-        "[dim]Try: anamnesis mcp-serve  →  Claude Code MCP integration[/dim]",
+        "[dim]Try: mnemosyne visualize  →  D3.js interactive graph in browser[/dim]\n"
+        "[dim]Try: mnemosyne timeline   →  temporal bug pattern evolution[/dim]\n"
+        "[dim]Try: mnemosyne mcp-serve  →  Claude Code MCP integration[/dim]",
         border_style="green",
     ))
 

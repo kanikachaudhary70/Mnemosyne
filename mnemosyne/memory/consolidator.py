@@ -3,8 +3,8 @@ import logging
 import asyncio
 from typing import List, Optional
 from collections import defaultdict
-from anamnesis.memory.client import MemoryClient
-from anamnesis.memory.schemas import MemoryRecord, MemoryType, CodeRuleMemory
+from mnemosyne.memory.client import MemoryClient
+from mnemosyne.memory.schemas import MemoryRecord, MemoryType, CodeRuleMemory
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class MemoryConsolidator:
             rule_results = await cognee.search(
                 query_text="recurring bug patterns, coding conventions, and preventable mistakes",
                 query_type=SearchType.CODING_RULES,
-                datasets=["anamnesis_codebase"],
+                datasets=["mnemosyne_codebase"],
                 top_k=20,
             )
 
@@ -144,7 +144,7 @@ class MemoryConsolidator:
         try:
             import openai
             import os
-            from anamnesis.config import configure_llm_env
+            from mnemosyne.config import configure_llm_env
 
             # Ollama (local & free) by default, or OpenAI if configured.
             configure_llm_env()
@@ -156,7 +156,7 @@ class MemoryConsolidator:
                 api_key=llm_key,
                 base_url=os.getenv("OPENAI_BASE_URL") or None,
             )
-            model = os.getenv("ANAMNESIS_LLM_MODEL", "gpt-4o-mini")
+            model = os.getenv("MNEMOSYNE_LLM_MODEL", "gpt-4o-mini")
 
             memory_texts = "\n\n".join([
                 f"BUG {i + 1}: {m.title}\n"
@@ -230,7 +230,7 @@ class MemoryConsolidator:
                 self._reflect_async(memories)
             )
             try:
-                result = future.result(timeout=60)
+                result = future.result(timeout=5)
                 if result:
                     return result
             except Exception as e:

@@ -1,19 +1,19 @@
 """
-Anamnesis MCP Server — Exposes codebase memory as MCP tools for Claude Code / Cursor.
+Mnemosyne MCP Server — Exposes codebase memory as MCP tools for Claude Code / Cursor.
 
 This server lets AI coding assistants query and update codebase memory natively,
-turning Anamnesis into an always-on knowledge layer for your AI pair programmer.
+turning Mnemosyne into an always-on knowledge layer for your AI pair programmer.
 
 Usage:
-    anamnesis mcp-serve                       # stdio transport (Claude Desktop)
-    anamnesis mcp-serve --transport sse       # SSE transport (web clients)
-    anamnesis mcp-serve --transport http      # Streamable HTTP
+    mnemosyne mcp-serve                       # stdio transport (Claude Desktop)
+    mnemosyne mcp-serve --transport sse       # SSE transport (web clients)
+    mnemosyne mcp-serve --transport http      # Streamable HTTP
 
 Claude Desktop config (~/.claude/claude_desktop_config.json):
     {
       "mcpServers": {
-        "anamnesis": {
-          "command": "anamnesis",
+        "mnemosyne": {
+          "command": "mnemosyne",
           "args": ["mcp-serve"],
           "cwd": "/path/to/your/project"
         }
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 def create_mcp_server():
     """
-    Create and configure the Anamnesis MCP server.
+    Create and configure the Mnemosyne MCP server.
     Returns the FastMCP instance with all tools registered.
     """
     try:
@@ -44,12 +44,12 @@ def create_mcp_server():
             "  uv add mcp"
         )
 
-    from anamnesis.memory.client import MemoryClient
-    from anamnesis.memory.schemas import BugFixMemory, MemoryType
-    from anamnesis.config import find_project_root
+    from mnemosyne.memory.client import MemoryClient
+    from mnemosyne.memory.schemas import BugFixMemory, MemoryType
+    from mnemosyne.config import find_project_root
 
     mcp = FastMCP(
-        "Anamnesis Codebase Memory",
+        "Mnemosyne Codebase Memory",
         instructions=(
             "You have access to this project's persistent codebase memory — a knowledge graph "
             "of past bug fixes, coding rules, and commit history. "
@@ -177,7 +177,7 @@ def create_mcp_server():
             hint = " for domain '" + domain + "'" if domain else ""
             return (
                 f"No coding rules found{hint}.\n"
-                "Run `anamnesis reflect` after storing several bug fixes to "
+                "Run `mnemosyne reflect` after storing several bug fixes to "
                 "auto-generate team coding conventions via cognee.memify()."
             )
 
@@ -212,7 +212,7 @@ def create_mcp_server():
         cognee_status = "✅ Active (Graph + Vector)" if client._cognee_initialized else "⚠️ Not initialized"
 
         return (
-            f"📊 **Anamnesis Codebase Memory Status**\n\n"
+            f"📊 **Mnemosyne Codebase Memory Status**\n\n"
             f"| Category | Count |\n"
             f"|---|---|\n"
             f"| 🐛 Bug Fix Memories | {len(bugs)} |\n"
@@ -244,7 +244,7 @@ def create_mcp_server():
 
 def run_server(transport: str = "stdio", host: str = "127.0.0.1", port: int = 8765) -> None:
     """
-    Start the Anamnesis MCP server.
+    Start the Mnemosyne MCP server.
 
     Args:
         transport: "stdio" | "sse" | "http"

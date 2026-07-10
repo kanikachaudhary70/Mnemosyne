@@ -1,13 +1,13 @@
 import pytest
 from pathlib import Path
 import tempfile
-from anamnesis.memory.client import MemoryClient
-from anamnesis.memory.schemas import BugFixMemory, MemoryType
-from anamnesis.memory.consolidator import MemoryConsolidator
+from mnemosyne.memory.client import MemoryClient
+from mnemosyne.memory.schemas import BugFixMemory, MemoryType
+from mnemosyne.memory.consolidator import MemoryConsolidator
 
 @pytest.fixture(autouse=True)
 def mock_cognee(monkeypatch):
-    monkeypatch.setattr("anamnesis.memory.client.MemoryClient._init_cognee_if_needed", lambda self: False)
+    monkeypatch.setenv("MNEMOSYNE_OFFLINE", "1")
 
 
 def test_remember_and_recall_bug():
