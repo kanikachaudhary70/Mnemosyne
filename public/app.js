@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .attr("markerHeight", 6)
                 .attr("orient", "auto")
                 .append("path")
-                .attr("fill", "rgba(255,255,255,0.15)")
+                .attr("fill", "rgba(255, 0, 127, 0.4)")
                 .attr("d", "M0,-5L10,0L0,5");
 
             const gContainer = svg.append("g");
@@ -390,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .selectAll("line")
                 .data(data.links)
                 .join("line")
-                .attr("stroke", "rgba(255, 255, 255, 0.08)")
+                .attr("stroke", "rgba(255, 0, 127, 0.25)")
                 .attr("stroke-width", 1.5)
                 .attr("marker-end", "url(#arrow)");
 
