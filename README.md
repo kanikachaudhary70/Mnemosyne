@@ -9,9 +9,9 @@
 
 ---
 
-## 🏆 Built for the Cognee AI Hackathon
+## 🧠 Project Overview
 
-Mnemosyne is a **codebase memory infrastructure showcase** built on **[Cognee AI](https://cognee.ai)**. Rather than treating Cognee as a basic vector database, it exercises the full **Cognee Memory Lifecycle** — and runs **100% locally and free** using [Ollama](https://ollama.com) (no paid API keys required).
+Mnemosyne is a local **codebase memory infrastructure and security scanning assistant** built on **[Cognee AI](https://cognee.ai)**. By implementing the complete **Cognee Memory Lifecycle**, it captures historical bugs and team coding conventions in a persistent knowledge graph, helping developers prevent repeating past code mistakes. It runs **100% locally and free** using [Ollama](https://ollama.com) (no paid API keys required).
 
 ```
                   ┌───────────────────────────────────────────────┐
