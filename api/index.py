@@ -239,7 +239,37 @@ def get_graph_data():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Mount static files at root for browser serving (keeps CORS happy)
-public_dir = root_dir / "public"
-app.mount("/", StaticFiles(directory=str(public_dir), html=True), name="public")
+from fastapi.responses import HTMLResponse
+from fastapi import Response
+from api.static_assets import HTML_CONTENT, CSS_CONTENT, JS_CONTENT
+
+@app.get("/", response_class=HTMLResponse)
+def get_index():
+    try:
+        public_index = root_dir / "public" / "index.html"
+        if public_index.exists():
+            return HTMLResponse(content=public_index.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    return HTMLResponse(content=HTML_CONTENT)
+
+@app.get("/style.css")
+def get_css():
+    try:
+        public_css = root_dir / "public" / "style.css"
+        if public_css.exists():
+            return Response(content=public_css.read_text(encoding="utf-8"), media_type="text/css")
+    except Exception:
+        pass
+    return Response(content=CSS_CONTENT, media_type="text/css")
+
+@app.get("/app.js")
+def get_js():
+    try:
+        public_js = root_dir / "public" / "app.js"
+        if public_js.exists():
+            return Response(content=public_js.read_text(encoding="utf-8"), media_type="application/javascript")
+    except Exception:
+        pass
+    return Response(content=JS_CONTENT, media_type="application/javascript")
 
