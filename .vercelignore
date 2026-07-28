@@ -10,3 +10,4 @@ demo
 scratch
 .anamnesis
 *.pyc
+pyproject.toml
