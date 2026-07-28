@@ -44,9 +44,24 @@ def find_project_root(start_path: Optional[Path] = None) -> Path:
     return current
 
 def get_mnemosyne_dir(repo_root: Optional[Path] = None) -> Path:
-    root = repo_root or find_project_root()
-    mnemosyne_dir = root / ".mnemosyne"
-    mnemosyne_dir.mkdir(parents=True, exist_ok=True)
+    if os.getenv("VERCEL") == "1":
+        mnemosyne_dir = Path("/tmp/.mnemosyne")
+        mnemosyne_dir.mkdir(parents=True, exist_ok=True)
+        # Copy initial bundled memories from /var/task/.mnemosyne if they exist
+        bundled_dir = Path("/var/task/.mnemosyne")
+        if bundled_dir.exists() and bundled_dir != mnemosyne_dir:
+            import shutil
+            for item in bundled_dir.iterdir():
+                dest = mnemosyne_dir / item.name
+                if item.is_file() and not dest.exists():
+                    try:
+                        shutil.copy2(item, dest)
+                    except Exception:
+                        pass
+    else:
+        root = repo_root or find_project_root()
+        mnemosyne_dir = root / ".mnemosyne"
+        mnemosyne_dir.mkdir(parents=True, exist_ok=True)
     return mnemosyne_dir
 
 def get_config_path(repo_root: Optional[Path] = None) -> Path:

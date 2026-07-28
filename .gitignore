@@ -81,6 +81,7 @@ venv.bak/
 
 # Anamnesis runtime data & local Cognee data
 .anamnesis/
+.mnemosyne/cognee_data/
 *.sqlite
 *.sqlite3
 
