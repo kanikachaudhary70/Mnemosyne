@@ -239,5 +239,7 @@ def get_graph_data():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Mount static files at root for browser serving (keeps CORS happy)
-app.mount("/", StaticFiles(directory=str(root_dir / "public"), html=True), name="public")
+# Mount static files at root for browser serving (keeps CORS happy, skips on Vercel where public dir is served via CDN)
+public_dir = root_dir / "public"
+if public_dir.exists():
+    app.mount("/", StaticFiles(directory=str(public_dir), html=True), name="public")
