@@ -3,18 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mnemosyne — Codebase Memory Graph</title>
+  <title>Mnemosyne — Autonomous Codebase Memory & Auto-Fix</title>
 
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- BubbledotICG-FinePos font via OnlineWebFonts CDN -->
-  <link
-    href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <!-- Font Awesome 6.5.2 -->
   <link
@@ -25,56 +19,60 @@
     referrerpolicy="no-referrer"
   />
 
-  <!-- D3.js v7 for Graph Visualizer -->
+  <!-- D3.js v7 for Knowledge Graph Visualizer -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
 
   <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
 </head>
 <body>
-  <!-- Full-viewport cover video -->
+  <!-- Deep Space Canvas & Cinematic Horizon Arc Glow (Inspired by Reference 1 & 2) -->
   <div class="bg">
-    <video class="bg-video" autoplay muted loop playsinline>
-      <source
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"
-        type="video/mp4"
-      />
-    </video>
+    <div class="horizon-arc-wrapper">
+      <div class="horizon-arc-glow"></div>
+      <div class="horizon-arc-rim"></div>
+    </div>
   </div>
 
   <div class="page">
-    <!-- 1) Header -->
+    <!-- 1) Header & Navigation Bar -->
     <header class="header">
+      <!-- Official Mnemosyne Wordmark + Glowing Orb Logo (Reference Image 3) -->
       <button class="logo-btn" aria-label="Return to Home" data-tab="home">
-        <img src="assets/logo.webp" alt="Mnemosyne Logo" width="52" height="52" />
+        <img src="assets/logo-transparent.webp" alt="MNEMOSYNE" class="brand-logo-img" />
       </button>
 
+      <!-- Center Nav Capsule Pill -->
       <nav class="nav-pill" aria-label="Main Navigation">
         <button class="nav-link active" data-tab="home">Home</button>
         <button class="nav-link" data-tab="dashboard">Dashboard</button>
         <button class="nav-link" data-tab="automate">⚡ Auto-Fix</button>
-        <button class="nav-link" data-tab="remember">Remember Bug</button>
-        <button class="nav-link" data-tab="recall">Recall Search</button>
+        <button class="nav-link" data-tab="remember">Remember</button>
+        <button class="nav-link" data-tab="recall">Recall</button>
         <button class="nav-link" data-tab="rules">Rules</button>
         <button class="nav-link" data-tab="security">Security</button>
         <button class="nav-link" data-tab="visualizer">Visualizer</button>
       </nav>
 
-      <button class="sign-in-btn" id="header-status-btn" title="View System Status" data-tab="dashboard">
-        <span class="status-pulse-dot" id="system-pulse-dot"></span>
-        <span id="system-status-text">Cognee Active</span>
-      </button>
+      <!-- Right Header Actions (Glowing Orange Status Pill) -->
+      <div class="header-action-group">
+        <button class="header-cta-btn" id="header-status-btn" title="View System Telemetry" data-tab="dashboard">
+          <span class="status-pulse-dot" id="system-pulse-dot"></span>
+          <span id="system-status-text">Cognee Active</span>
+        </button>
 
-      <button class="burger-btn" aria-label="Toggle navigation" aria-expanded="false" id="burger-btn">
-        <span class="burger-bar"></span>
-        <span class="burger-bar"></span>
-        <span class="burger-bar"></span>
-      </button>
+        <button class="burger-btn" aria-label="Toggle navigation" aria-expanded="false" id="burger-btn">
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+        </button>
+      </div>
     </header>
 
-    <!-- Mobile Menu Overlay & Sheet -->
+    <!-- Mobile Navigation Drawer & Overlay -->
     <div class="mobile-overlay" id="mobile-overlay" hidden></div>
     <div class="mobile-sheet" id="mobile-sheet" hidden aria-label="Mobile Navigation">
-      <button class="mobile-link active" data-tab="home">Home</button>
+      <button class="mobile-link active" data-tab="home">🏠 Home</button>
       <button class="mobile-link" data-tab="dashboard">📊 Dashboard</button>
       <button class="mobile-link" data-tab="automate">⚡ Auto-Fix Pipeline</button>
       <button class="mobile-link" data-tab="remember">💾 Remember Bug</button>
@@ -89,47 +87,154 @@
     </div>
 
     <!-- =========================================================
-         Main Viewport: All Sections seamlessly styled like Pic 2
+         Main Viewport: All Modular Views
          ========================================================= -->
     <main class="main-viewport">
+
       <!-- -------------------------------------------------------
-           VIEW 0: Home Hero (Main Overview)
+           VIEW 0: Home Hero (Cinematic Layout from Reference 1 & 2)
            ------------------------------------------------------- -->
       <section class="page-view active hero" id="view-home">
-        <!-- Project Stack Pill -->
-        <div class="trust-row anim" style="--d: 0.05s">
-          <div class="tech-stack-badges">
-            <div class="tech-badge" title="Cognee AI Memory Engine">
-              <div class="inner-circle"><i class="fa-solid fa-brain"></i></div>
-            </div>
-            <div class="tech-badge" title="Git Commit & History Ingestion">
-              <div class="inner-circle"><i class="fa-brands fa-git-alt"></i></div>
-            </div>
-            <div class="tech-badge" title="Python 3.10+ Native Engine">
-              <div class="inner-circle"><i class="fa-brands fa-python"></i></div>
-            </div>
-          </div>
-          <div class="trust-pill" id="hero-status-pill">
-            <span class="status-pulse-dot" id="hero-pulse-dot"></span>
-            <span id="hero-status-text">Codebase Memory Graph</span>
-          </div>
+        <!-- What's New Badge Pill -->
+        <div class="announcement-pill" data-tab="automate">
+          <span class="pill-badge">What's New</span>
+          <span class="pill-text">Autonomous Bug Detection & Auto-Fix v2.0</span>
+          <i class="fa-solid fa-arrow-right pill-arrow"></i>
         </div>
 
-        <!-- Headline in dot-matrix font -->
-        <h1 class="headline anim">
-          <span class="headline-line headline-line-1">Mnemosyne</span>
-          <span class="headline-line headline-line-2">Codebase Memory Graph</span>
+        <!-- Headline -->
+        <h1 class="hero-headline">
+          Intelligent Codebase Memory<br />
+          <span class="hero-highlight">Powered by AI.</span>
         </h1>
 
         <!-- Subhead -->
-        <p class="subhead anim" style="--d: 0.28s">
-          Persistent memory for engineering teams. Ingests git commits, recalls bug fixes,<br />synthesizes team rules with Cognee AI, and guards against code regressions.
+        <p class="hero-subtitle">
+          Gain clarity and harness the persistent power of codebase memory with Mnemosyne.<br />
+          Autonomous multi-layer scanning, memory-guided auto-repair, and verified GitHub pull requests.
         </p>
 
-        <!-- CTA -->
-        <button class="cta-btn" id="hero-get-started-btn" style="--d: 0.4s" data-tab="dashboard">
-          <span>Explore Memory Graph</span>
-        </button>
+        <!-- CTA Buttons -->
+        <div class="hero-cta-row">
+          <button class="cta-btn" id="hero-get-started-btn" data-tab="dashboard">
+            <span>Explore Dashboard</span>
+          </button>
+          <button class="cta-btn secondary-btn" data-tab="automate">
+            <span>⚡ Run Auto-Fix</span>
+          </button>
+        </div>
+
+        <!-- Interactive Floating Live Telemetry Preview Card (Reference Image 1 & 2) -->
+        <div class="hero-preview-container">
+          <div class="preview-top-bar">
+            <div class="preview-top-left">
+              <div class="preview-window-dots">
+                <span class="dot-btn dot-red"></span>
+                <span class="dot-btn dot-yellow"></span>
+                <span class="dot-btn dot-green"></span>
+              </div>
+              <span class="preview-title">MNEMOSYNE TELEMETRY OVERVIEW</span>
+            </div>
+            <div class="preview-status-chip">
+              <span class="status-pulse-dot" style="background: var(--status-success);"></span>
+              <span>All Systems Operational</span>
+            </div>
+          </div>
+
+          <!-- 4 Metric Cards with Sparklines -->
+          <div class="preview-grid">
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>TOTAL GRAPH NODES</span>
+                <span class="metric-trend up">+4.2%</span>
+              </div>
+              <div class="preview-metric-val">72,350</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,18 Q20,22 40,12 T70,8 T100,4" fill="none" stroke="#10B981" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>BUGS RECALLED</span>
+                <span class="metric-trend orange">12.8%</span>
+              </div>
+              <div class="preview-metric-val">29.4%</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,14 Q25,6 50,16 T75,10 T100,12" fill="none" stroke="#FF7900" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>AUTO-FIX PASS RATE</span>
+                <span class="metric-trend up">+18.1%</span>
+              </div>
+              <div class="preview-metric-val">98.6%</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,20 Q30,14 60,8 T80,5 T100,2" fill="none" stroke="#10B981" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>CONSOLIDATED RULES</span>
+                <span class="metric-trend orange">10.5%</span>
+              </div>
+              <div class="preview-metric-val">92,913</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,16 Q20,8 45,14 T70,6 T100,8" fill="none" stroke="#FF7900" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bottom Split Row: Pipelines + Activity Chart -->
+          <div class="preview-split-row">
+            <div class="preview-split-box">
+              <div class="split-box-title">
+                <i class="fa-solid fa-microchip" style="color: var(--brand-orange);"></i>
+                <span>Active Memory Pipelines</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-solid fa-brain" style="color: #8B5CF6;"></i>
+                  <span>Cognee AI Relational Graph</span>
+                </div>
+                <span class="pipeline-badge">Active</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-brands fa-git-alt" style="color: #F97316;"></i>
+                  <span>Git Branch Sentinel & Hooks</span>
+                </div>
+                <span class="pipeline-badge">Synchronized</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--brand-orange-bright);"></i>
+                  <span>Autonomous AutoFix Engine</span>
+                </div>
+                <span class="pipeline-badge">Ready</span>
+              </div>
+            </div>
+
+            <div class="preview-split-box">
+              <div class="split-box-title">
+                <i class="fa-solid fa-chart-simple" style="color: var(--brand-orange);"></i>
+                <span>Weekly Auto-Fix Verification</span>
+              </div>
+              <div class="mini-barchart">
+                <div class="bar-col"><div class="bar-fill" style="height: 40%;"></div><span class="bar-label">Mon</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 65%;"></div><span class="bar-label">Tue</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 55%;"></div><span class="bar-label">Wed</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 85%;"></div><span class="bar-label">Thu</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 70%;"></div><span class="bar-label">Fri</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 95%;"></div><span class="bar-label">Sat</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 90%;"></div><span class="bar-label">Sun</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- -------------------------------------------------------
@@ -294,8 +399,8 @@
       <section class="page-view" id="view-rules">
         <div class="view-header-block flex-header">
           <div>
-            <h2 class="view-title" style="text-align: left;">Consolidated Architectural Rules</h2>
-            <p class="view-subtitle" style="text-align: left; margin-bottom: 0;">Team rules synthesized by AI reflection clustering across recurring bug patterns</p>
+            <h2 class="view-title">Consolidated Architectural Rules</h2>
+            <p class="view-subtitle">Team rules synthesized by AI reflection clustering across recurring bug patterns</p>
           </div>
           <button class="cta-btn small-btn" id="btn-reflect-rules">
             <span>✨ Reflect & Generalize Rules</span>
@@ -359,8 +464,8 @@
       <section class="page-view" id="view-visualizer">
         <div class="view-header-block flex-header">
           <div>
-            <h2 class="view-title" style="text-align: left;">Knowledge Graph Visualizer</h2>
-            <p class="view-subtitle" style="text-align: left; margin-bottom: 0;">Interactive relations between tenants, files, bugs, commits, and rules</p>
+            <h2 class="view-title">Knowledge Graph Visualizer</h2>
+            <p class="view-subtitle">Interactive relations between tenants, files, bugs, commits, and rules</p>
           </div>
           <div class="graph-legend">
             <span class="legend-item"><span class="legend-dot tenant"></span>Tenant</span>
@@ -393,8 +498,8 @@
       <section class="page-view" id="view-automate">
         <div class="view-header-block flex-header">
           <div>
-            <h2 class="view-title" style="text-align: left;">Autonomous Bug Detection & Auto-Fix</h2>
-            <p class="view-subtitle" style="text-align: left; margin-bottom: 0;">Upload code or select files for multi-layer scanning, memory-guided auto-repair, automated verification, and GitHub PR creation</p>
+            <h2 class="view-title">Autonomous Bug Detection & Auto-Fix</h2>
+            <p class="view-subtitle">Upload code or select files for multi-layer scanning, memory-guided auto-repair, automated verification, and GitHub PR creation</p>
           </div>
           <button class="cta-btn small-btn" id="btn-refresh-jobs">
             <span>🔄 Refresh History</span>
@@ -511,28 +616,36 @@
 
     <!-- 3) Stats Footer (4 Metrics Synced with Live Graph Telemetry) -->
     <footer class="stats-footer">
-      <div class="stat-item anim" style="--d: 0.5s">
+      <div class="stat-item">
         <div class="stat-glyph">&lt;</div>
-        <div class="stat-value" id="stat-total-nodes-val" data-target="40" data-suffix="" data-decimals="0" data-index="0">40</div>
-        <div class="stat-label">Total Graph Nodes</div>
+        <div>
+          <div class="stat-value" id="stat-total-nodes-val" data-target="40" data-suffix="" data-decimals="0" data-index="0">40</div>
+          <div class="stat-label">Total Graph Nodes</div>
+        </div>
       </div>
 
-      <div class="stat-item anim" style="--d: 0.58s">
+      <div class="stat-item">
         <div class="stat-glyph">%</div>
-        <div class="stat-value" id="stat-bug-fixes-val" data-target="7" data-suffix="" data-decimals="0" data-index="1">7</div>
-        <div class="stat-label">Bug Fix Memories</div>
+        <div>
+          <div class="stat-value" id="stat-bug-fixes-val" data-target="7" data-suffix="" data-decimals="0" data-index="1">7</div>
+          <div class="stat-label">Bug Fix Memories</div>
+        </div>
       </div>
 
-      <div class="stat-item anim" style="--d: 0.66s">
+      <div class="stat-item">
         <div class="stat-glyph">*</div>
-        <div class="stat-value" id="stat-rules-val" data-target="14" data-suffix="" data-decimals="0" data-index="2">14</div>
-        <div class="stat-label">Consolidated Rules</div>
+        <div>
+          <div class="stat-value" id="stat-rules-val" data-target="14" data-suffix="" data-decimals="0" data-index="2">14</div>
+          <div class="stat-label">Consolidated Rules</div>
+        </div>
       </div>
 
-      <div class="stat-item anim" style="--d: 0.74s">
+      <div class="stat-item">
         <div class="stat-glyph">#</div>
-        <div class="stat-value" id="stat-commits-val" data-target="5" data-suffix="" data-decimals="0" data-index="3">5</div>
-        <div class="stat-label">Commit Memories</div>
+        <div>
+          <div class="stat-value" id="stat-commits-val" data-target="5" data-suffix="" data-decimals="0" data-index="3">5</div>
+          <div class="stat-label">Commit Memories</div>
+        </div>
       </div>
     </footer>
   </div>

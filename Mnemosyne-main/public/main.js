@@ -81,31 +81,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Attach click listeners to all tab buttons
-  navLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      const tab = link.getAttribute("data-tab");
-      switchTab(tab);
+  // Attach click listeners to all tab buttons and data-tab triggers
+  document.querySelectorAll("[data-tab]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      const tab = el.getAttribute("data-tab");
+      if (tab) {
+        e.preventDefault();
+        switchTab(tab);
+      }
     });
   });
-
-  if (logoBtn) {
-    logoBtn.addEventListener("click", () => {
-      switchTab("home");
-    });
-  }
-
-  if (heroGetStartedBtn) {
-    heroGetStartedBtn.addEventListener("click", () => {
-      switchTab("dashboard");
-    });
-  }
-
-  if (headerStatusBtn) {
-    headerStatusBtn.addEventListener("click", () => {
-      switchTab("dashboard");
-    });
-  }
 
   // =========================================================
   // Mobile Menu Interactions
@@ -545,7 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .attr("markerHeight", 6)
         .attr("orient", "auto")
         .append("path")
-        .attr("fill", "rgba(255, 0, 127, 0.45)")
+        .attr("fill", "rgba(255, 121, 0, 0.65)")
         .attr("d", "M0,-5L10,0L0,5");
 
       const g = svg.append("g");
