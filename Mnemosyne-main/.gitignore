@@ -100,3 +100,9 @@ dmypy.json
 .ruff_cache/
 
 .vercel
+
+# Mnemosyne temporary workspaces and job artifacts
+.mnemosyne/workspaces/
+.mnemosyne/automation_jobs.json
+Mnemosyne-main/.mnemosyne/workspaces/
+Mnemosyne-main/.mnemosyne/automation_jobs.json

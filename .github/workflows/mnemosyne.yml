@@ -1,0 +1,54 @@
+name: Mnemosyne Autonomous Security & Code Verification
+
+on:
+  push:
+    branches: [ main, "mnemosyne/**" ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  code-quality-and-security:
+    name: Autonomous Code Scanning & Verification
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Mnemosyne-main
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Set Offline Memory Mode for CI
+        run: |
+          echo "MNEMOSYNE_OFFLINE=1" >> $GITHUB_ENV
+
+      - name: Run Test Suite
+        run: |
+          python -m pytest -v
+
+      - name: Verify Pre-Commit Commit Guard
+        run: |
+          python -m mnemosyne.cli --version
+          python -m mnemosyne.cli config show
+
+      - name: Autonomous Security & Bug Scan
+        run: |
+          # Verify that core services pass deterministic scanning
+          python -m mnemosyne.cli scan --file mnemosyne/utils/security_scanner.py

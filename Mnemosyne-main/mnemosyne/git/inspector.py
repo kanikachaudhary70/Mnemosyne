@@ -62,3 +62,20 @@ class GitInspector:
             return [d.a_path or d.b_path for d in diffs if d.a_path or d.b_path]
         except Exception:
             return []
+
+    @classmethod
+    def get_staged_content(cls, repo_path: Optional[Path] = None, rel_path: str = "") -> Optional[str]:
+        """Retrieve the exact staged content from git index."""
+        repo = cls.get_repo(repo_path)
+        if not repo:
+            return None
+        try:
+            # git show :rel_path reads from index
+            clean_path = rel_path.replace("\\", "/")
+            return repo.git.show(f":{clean_path}")
+        except Exception:
+            # Fallback to reading file if unstaged
+            target = (repo_path or Path.cwd()) / rel_path
+            if target.exists():
+                return target.read_text(encoding="utf-8", errors="replace")
+            return None

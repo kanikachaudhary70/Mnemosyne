@@ -51,6 +51,7 @@
       <nav class="nav-pill" aria-label="Main Navigation">
         <button class="nav-link active" data-tab="home">Home</button>
         <button class="nav-link" data-tab="dashboard">Dashboard</button>
+        <button class="nav-link" data-tab="automate">⚡ Auto-Fix</button>
         <button class="nav-link" data-tab="remember">Remember Bug</button>
         <button class="nav-link" data-tab="recall">Recall Search</button>
         <button class="nav-link" data-tab="rules">Rules</button>
@@ -75,6 +76,7 @@
     <div class="mobile-sheet" id="mobile-sheet" hidden aria-label="Mobile Navigation">
       <button class="mobile-link active" data-tab="home">Home</button>
       <button class="mobile-link" data-tab="dashboard">📊 Dashboard</button>
+      <button class="mobile-link" data-tab="automate">⚡ Auto-Fix Pipeline</button>
       <button class="mobile-link" data-tab="remember">💾 Remember Bug</button>
       <button class="mobile-link" data-tab="recall">🔍 Recall Search</button>
       <button class="mobile-link" data-tab="rules">📜 Consolidated Rules</button>
@@ -380,6 +382,127 @@
             </div>
             <div class="drawer-body" id="drawer-node-content">
               <p class="empty-state-text">Click on any node in the graph to view relational properties.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 7: Autonomous Bug Detection & Auto-Fix
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-automate">
+        <div class="view-header-block flex-header">
+          <div>
+            <h2 class="view-title" style="text-align: left;">Autonomous Bug Detection & Auto-Fix</h2>
+            <p class="view-subtitle" style="text-align: left; margin-bottom: 0;">Upload code or select files for multi-layer scanning, memory-guided auto-repair, automated verification, and GitHub PR creation</p>
+          </div>
+          <button class="cta-btn small-btn" id="btn-refresh-jobs">
+            <span>🔄 Refresh History</span>
+          </button>
+        </div>
+
+        <div class="automation-container">
+          <!-- Step 1: Upload and Configuration Panel -->
+          <div class="automation-input-card">
+            <div class="dropzone-area" id="upload-dropzone">
+              <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+              <div class="dropzone-text">
+                <span class="dropzone-title">Drag & drop source code files here</span>
+                <span class="dropzone-sub">Supports Python (.py), JS/TS (.js, .ts), JSON, HTML, CSS (Max 10MB)</span>
+              </div>
+              <input type="file" id="automation-file-input" multiple accept=".py,.js,.jsx,.ts,.tsx,.json,.html,.css,.yaml,.yml" hidden />
+              <button type="button" class="cta-btn small-btn" id="btn-browse-file">Browse File</button>
+            </div>
+
+            <!-- Selected Files Preview & Options -->
+            <div class="automation-options-row">
+              <div class="selected-files-badge" id="selected-files-label">No files selected</div>
+              <div class="automation-flags">
+                <label class="flag-item">
+                  <input type="checkbox" id="flag-autofix" checked />
+                  <span>Auto-Apply Safe Fixes</span>
+                </label>
+                <label class="flag-item">
+                  <input type="checkbox" id="flag-create-pr" />
+                  <span>Open GitHub PR</span>
+                </label>
+                <input type="text" id="target-branch-input" placeholder="Branch" value="main" class="small-text-input" />
+              </div>
+              <button class="cta-btn small-btn action-cta" id="btn-run-automation">
+                <span>⚡ Run Autonomous Pipeline</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 2: Live Progress & Telemetry Tracker -->
+          <div class="automation-progress-card hide" id="automation-progress-box">
+            <div class="progress-header">
+              <span class="progress-title" id="automation-step-text">Initializing autonomous workspace...</span>
+              <span class="progress-percent-badge" id="automation-percent-badge">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="automation-progress-bar" style="width: 0%;"></div>
+            </div>
+            <div class="step-nodes-row">
+              <span class="step-node active" id="step-node-intake">1. Intake</span>
+              <span class="step-node" id="step-node-scan">2. Multi-Layer Scan</span>
+              <span class="step-node" id="step-node-recall">3. Memory Recall</span>
+              <span class="step-node" id="step-node-fix">4. Auto-Fix</span>
+              <span class="step-node" id="step-node-verify">5. Verification</span>
+              <span class="step-node" id="step-node-pr">6. GitHub PR</span>
+            </div>
+          </div>
+
+          <!-- Step 3: Scan Findings & Patches Output -->
+          <div class="automation-results-card hide" id="automation-results-box">
+            <div class="results-tabs-row">
+              <button class="res-tab active" data-res-tab="findings">Findings (<span id="res-findings-count">0</span>)</button>
+              <button class="res-tab" data-res-tab="diff">Patches & Diff (<span id="res-patches-count">0</span>)</button>
+              <button class="res-tab" data-res-tab="github">GitHub PR & Verification</button>
+            </div>
+
+            <!-- Tab 1: Findings List -->
+            <div class="res-panel active" id="res-panel-findings">
+              <div class="findings-scroll-list" id="automation-findings-list"></div>
+            </div>
+
+            <!-- Tab 2: Diff View -->
+            <div class="res-panel" id="res-panel-diff">
+              <div class="diff-header-bar">
+                <span class="diff-file-label" id="diff-file-label">Unified Diff</span>
+                <button class="cta-btn small-btn" id="btn-apply-local-patch">Apply to Workspace</button>
+              </div>
+              <pre class="diff-pre" id="automation-diff-display">No diff generated</pre>
+            </div>
+
+            <!-- Tab 3: GitHub & Verification Telemetry -->
+            <div class="res-panel" id="res-panel-github">
+              <div class="github-telemetry-box" id="automation-github-telemetry"></div>
+            </div>
+          </div>
+
+          <!-- Step 4: History Panel -->
+          <div class="automation-history-card">
+            <h4 class="history-title">Recent Autonomous Jobs</h4>
+            <div class="history-table-container">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Status</th>
+                    <th>Files</th>
+                    <th>Findings</th>
+                    <th>Fixes</th>
+                    <th>GitHub PR</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody id="jobs-history-body">
+                  <tr>
+                    <td colspan="7" class="empty-state-text">Loading jobs history...</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
