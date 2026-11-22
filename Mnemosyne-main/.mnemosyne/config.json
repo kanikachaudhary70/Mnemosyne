@@ -4,7 +4,7 @@
   "hooks_installed": true,
   "max_context_diffs": 5,
   "reflection_threshold": 3,
-  "cognee_api_key": null,
+  "cognee_api_key": "test-cognee-key-123",
   "cognee_api_url": "https://api.cognee.ai",
   "llm_provider": "ollama",
   "llm_api_key": null,
@@ -14,7 +14,7 @@
   "ollama_base_url": "http://localhost:11434/v1",
   "use_custom_graph_schema": false,
   "use_temporal_cognify": false,
-  "use_cloud": false,
+  "use_cloud": true,
   "post_commit_hook_installed": true,
   "initialized": true
 }

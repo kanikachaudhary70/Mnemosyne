@@ -192,7 +192,7 @@
     },
     "timestamp": "2026-07-10T19:37:55.122542+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_commit_1a9b4b8",
@@ -212,7 +212,7 @@
     },
     "timestamp": "2026-07-10T19:38:08.484570+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_commit_49c648a",
@@ -232,7 +232,7 @@
     },
     "timestamp": "2026-07-10T19:38:09.230215+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_commit_b021970",
@@ -290,7 +290,7 @@
     },
     "timestamp": "2026-07-10T19:38:09.930616+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_commit_7e4677b",
@@ -331,7 +331,7 @@
     },
     "timestamp": "2026-07-10T19:38:10.642834+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "rule_7cf9122b",
@@ -471,7 +471,7 @@
     },
     "timestamp": "2026-07-10T19:58:07.035276+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "rule_96060018",
@@ -714,6 +714,102 @@
       "timestamp": "2026-10-19T12:50:44.736245+00:00"
     },
     "timestamp": "2026-10-19T12:50:44.736245+00:00",
+    "active": true,
+    "search_strategy": "KEYWORD_FALLBACK"
+  },
+  {
+    "id": "mem_bug_df177f73",
+    "memory_type": "bug_fix",
+    "title": "Auto-fixed: Code Quality in demo_test.py",
+    "content": "[BUG FIX] Auto-fixed: Code Quality in demo_test.py\nFile: demo_test.py\nRoot Cause: Found bare 'except:' clause which catches system exit and keyboard interrupts.\nFix Applied: Applied deterministic safety transformation\nTags: autofix, py-bare-except\n",
+    "file_path": "demo_test.py",
+    "metadata": {
+      "id": "mem_bug_df177f73",
+      "file_path": "demo_test.py",
+      "function_name": null,
+      "title": "Auto-fixed: Code Quality in demo_test.py",
+      "root_cause": "Found bare 'except:' clause which catches system exit and keyboard interrupts.",
+      "fix_description": "Applied deterministic safety transformation",
+      "severity": "medium",
+      "tags": [
+        "autofix",
+        "py-bare-except"
+      ],
+      "timestamp": "2026-11-22T17:25:46.363734+00:00"
+    },
+    "timestamp": "2026-11-22T17:25:46.363734+00:00",
+    "active": true,
+    "search_strategy": null
+  },
+  {
+    "id": "mem_bug_cba89d02",
+    "memory_type": "bug_fix",
+    "title": "Auto-fixed: Code Cleanliness in demo_test.py",
+    "content": "[BUG FIX] Auto-fixed: Code Cleanliness in demo_test.py\nFile: demo_test.py\nRoot Cause: Imported 'sys' is never used in file.\nFix Applied: Applied deterministic safety transformation\nTags: autofix, py-unused-import\n",
+    "file_path": "demo_test.py",
+    "metadata": {
+      "id": "mem_bug_cba89d02",
+      "file_path": "demo_test.py",
+      "function_name": null,
+      "title": "Auto-fixed: Code Cleanliness in demo_test.py",
+      "root_cause": "Imported 'sys' is never used in file.",
+      "fix_description": "Applied deterministic safety transformation",
+      "severity": "low",
+      "tags": [
+        "autofix",
+        "py-unused-import"
+      ],
+      "timestamp": "2026-11-22T17:25:46.365861+00:00"
+    },
+    "timestamp": "2026-11-22T17:25:46.365861+00:00",
+    "active": true,
+    "search_strategy": null
+  },
+  {
+    "id": "rule_9a7ec105",
+    "memory_type": "rule",
+    "title": "Use transactions and check query results before use",
+    "content": "[CONSOLIDATED RULE] Use transactions and check query results before use\nDomain: database\nRule: Wrap related DB operations in transactions. Check for empty results before accessing query output.\nObserved in files: demo_test.py\nConfidence: 0.73\n",
+    "file_path": null,
+    "metadata": {
+      "id": "rule_9a7ec105",
+      "rule_title": "Use transactions and check query results before use",
+      "description": "Wrap related DB operations in transactions. Check for empty results before accessing query output.",
+      "domain": "database",
+      "origin_memory_ids": [
+        "mem_bug_cba89d02"
+      ],
+      "provenance_files": [
+        "demo_test.py"
+      ],
+      "confidence": 0.73,
+      "timestamp": "2026-11-22T17:25:46.365861+00:00"
+    },
+    "timestamp": "2026-11-22T17:25:46.365861+00:00",
+    "active": true,
+    "search_strategy": null
+  },
+  {
+    "id": "mem_bug_0177af46",
+    "memory_type": "bug_fix",
+    "title": "Auto-fixed: Code Cleanliness in demo_test.py",
+    "content": "[BUG FIX] Auto-fixed: Code Cleanliness in demo_test.py\nFile: demo_test.py\nRoot Cause: Imported 'os' is never used in file.\nFix Applied: Applied deterministic safety transformation\nTags: autofix, py-unused-import\n",
+    "file_path": "demo_test.py",
+    "metadata": {
+      "id": "mem_bug_0177af46",
+      "file_path": "demo_test.py",
+      "function_name": null,
+      "title": "Auto-fixed: Code Cleanliness in demo_test.py",
+      "root_cause": "Imported 'os' is never used in file.",
+      "fix_description": "Applied deterministic safety transformation",
+      "severity": "low",
+      "tags": [
+        "autofix",
+        "py-unused-import"
+      ],
+      "timestamp": "2026-11-22T17:25:46.365861+00:00"
+    },
+    "timestamp": "2026-11-22T17:25:46.365861+00:00",
     "active": true,
     "search_strategy": null
   }

@@ -38,7 +38,7 @@ class GitHubManager:
             return env_slug
 
         if not self.repo:
-            return "Abhay122710/mnemosyne"
+            return "kanikachaudhary70/Mnemosyne"
 
         try:
             for remote in self.repo.remotes:
@@ -49,7 +49,7 @@ class GitHubManager:
                         return f"{m.group(1)}/{m.group(2)}"
         except Exception:
             pass
-        return "Abhay122710/mnemosyne"
+        return "kanikachaudhary70/Mnemosyne"
 
     def publish_verified_fixes(
         self,
