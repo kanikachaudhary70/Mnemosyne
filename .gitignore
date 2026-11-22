@@ -1,12 +1,46 @@
 # Python bytecode and caches
 __pycache__/
 *.py[cod]
+*$py.class
+*.pyc
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.dmypy.json
 
 # Mnemosyne temporary workspaces and job artifacts
 .mnemosyne/workspaces/
 .mnemosyne/automation_jobs.json
+.mnemosyne/cognee_data/
 Mnemosyne-main/.mnemosyne/workspaces/
 Mnemosyne-main/.mnemosyne/automation_jobs.json
 Mnemosyne-main/.mnemosyne/cognee_data/
+
+# Distribution & packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+*.sqlite
+*.sqlite3
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Vercel runtime
+.vercel

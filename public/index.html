@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mnemosyne — Autonomous Codebase Memory & Auto-Fix</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome 6.5.2 -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
+  <!-- D3.js v7 for Knowledge Graph Visualizer -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+</head>
+<body>
+  <!-- Deep Space Canvas & Cinematic Horizon Arc Glow (Inspired by Reference 1 & 2) -->
+  <div class="bg">
+    <div class="horizon-arc-wrapper">
+      <div class="horizon-arc-glow"></div>
+      <div class="horizon-arc-rim"></div>
+    </div>
+  </div>
+
+  <div class="page">
+    <!-- 1) Header & Navigation Bar -->
+    <header class="header">
+      <!-- Official Mnemosyne Wordmark + Glowing Orb Logo (Reference Image 3) -->
+      <button class="logo-btn" aria-label="Return to Home" data-tab="home">
+        <img src="assets/logo-transparent.webp" alt="MNEMOSYNE" class="brand-logo-img" />
+      </button>
+
+      <!-- Center Nav Capsule Pill -->
+      <nav class="nav-pill" aria-label="Main Navigation">
+        <button class="nav-link active" data-tab="home">Home</button>
+        <button class="nav-link" data-tab="dashboard">Dashboard</button>
+        <button class="nav-link" data-tab="automate">⚡ Auto-Fix</button>
+        <button class="nav-link" data-tab="remember">Remember</button>
+        <button class="nav-link" data-tab="recall">Recall</button>
+        <button class="nav-link" data-tab="rules">Rules</button>
+        <button class="nav-link" data-tab="security">Security</button>
+        <button class="nav-link" data-tab="visualizer">Visualizer</button>
+      </nav>
+
+      <!-- Right Header Actions (Glowing Orange Status Pill) -->
+      <div class="header-action-group">
+        <button class="header-cta-btn" id="header-status-btn" title="View System Telemetry" data-tab="dashboard">
+          <span class="status-pulse-dot" id="system-pulse-dot"></span>
+          <span id="system-status-text">Cognee Active</span>
+        </button>
+
+        <button class="burger-btn" aria-label="Toggle navigation" aria-expanded="false" id="burger-btn">
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer & Overlay -->
+    <div class="mobile-overlay" id="mobile-overlay" hidden></div>
+    <div class="mobile-sheet" id="mobile-sheet" hidden aria-label="Mobile Navigation">
+      <button class="mobile-link active" data-tab="home">🏠 Home</button>
+      <button class="mobile-link" data-tab="dashboard">📊 Dashboard</button>
+      <button class="mobile-link" data-tab="automate">⚡ Auto-Fix Pipeline</button>
+      <button class="mobile-link" data-tab="remember">💾 Remember Bug</button>
+      <button class="mobile-link" data-tab="recall">🔍 Recall Search</button>
+      <button class="mobile-link" data-tab="rules">📜 Consolidated Rules</button>
+      <button class="mobile-link" data-tab="security">🛡️ Security Scan</button>
+      <button class="mobile-link" data-tab="visualizer">🕸️ Graph Visualizer</button>
+      <div class="mobile-status-row">
+        <span class="status-pulse-dot" id="mobile-pulse-dot"></span>
+        <span id="mobile-status-text">Cognee Cloud Active</span>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         Main Viewport: All Modular Views
+         ========================================================= -->
+    <main class="main-viewport">
+
+      <!-- -------------------------------------------------------
+           VIEW 0: Home Hero (Cinematic Layout from Reference 1 & 2)
+           ------------------------------------------------------- -->
+      <section class="page-view active hero" id="view-home">
+        <!-- What's New Badge Pill -->
+        <div class="announcement-pill" data-tab="automate">
+          <span class="pill-badge">What's New</span>
+          <span class="pill-text">Autonomous Bug Detection & Auto-Fix v2.0</span>
+          <i class="fa-solid fa-arrow-right pill-arrow"></i>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="hero-headline">
+          Intelligent Codebase Memory<br />
+          <span class="hero-highlight">Powered by AI.</span>
+        </h1>
+
+        <!-- Subhead -->
+        <p class="hero-subtitle">
+          Gain clarity and harness the persistent power of codebase memory with Mnemosyne.<br />
+          Autonomous multi-layer scanning, memory-guided auto-repair, and verified GitHub pull requests.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="hero-cta-row">
+          <button class="cta-btn" id="hero-get-started-btn" data-tab="dashboard">
+            <span>Explore Dashboard</span>
+          </button>
+          <button class="cta-btn secondary-btn" data-tab="automate">
+            <span>⚡ Run Auto-Fix</span>
+          </button>
+        </div>
+
+        <!-- Interactive Floating Live Telemetry Preview Card (Reference Image 1 & 2) -->
+        <div class="hero-preview-container">
+          <div class="preview-top-bar">
+            <div class="preview-top-left">
+              <div class="preview-window-dots">
+                <span class="dot-btn dot-red"></span>
+                <span class="dot-btn dot-yellow"></span>
+                <span class="dot-btn dot-green"></span>
+              </div>
+              <span class="preview-title">MNEMOSYNE TELEMETRY OVERVIEW</span>
+            </div>
+            <div class="preview-status-chip">
+              <span class="status-pulse-dot" style="background: var(--status-success);"></span>
+              <span>All Systems Operational</span>
+            </div>
+          </div>
+
+          <!-- 4 Metric Cards with Sparklines -->
+          <div class="preview-grid">
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>TOTAL GRAPH NODES</span>
+                <span class="metric-trend up">+4.2%</span>
+              </div>
+              <div class="preview-metric-val">72,350</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,18 Q20,22 40,12 T70,8 T100,4" fill="none" stroke="#10B981" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>BUGS RECALLED</span>
+                <span class="metric-trend orange">12.8%</span>
+              </div>
+              <div class="preview-metric-val">29.4%</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,14 Q25,6 50,16 T75,10 T100,12" fill="none" stroke="#FF7900" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>AUTO-FIX PASS RATE</span>
+                <span class="metric-trend up">+18.1%</span>
+              </div>
+              <div class="preview-metric-val">98.6%</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,20 Q30,14 60,8 T80,5 T100,2" fill="none" stroke="#10B981" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>CONSOLIDATED RULES</span>
+                <span class="metric-trend orange">10.5%</span>
+              </div>
+              <div class="preview-metric-val">92,913</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+                <path d="M0,16 Q20,8 45,14 T70,6 T100,8" fill="none" stroke="#FF7900" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bottom Split Row: Pipelines + Activity Chart -->
+          <div class="preview-split-row">
+            <div class="preview-split-box">
+              <div class="split-box-title">
+                <i class="fa-solid fa-microchip" style="color: var(--brand-orange);"></i>
+                <span>Active Memory Pipelines</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-solid fa-brain" style="color: #8B5CF6;"></i>
+                  <span>Cognee AI Relational Graph</span>
+                </div>
+                <span class="pipeline-badge">Active</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-brands fa-git-alt" style="color: #F97316;"></i>
+                  <span>Git Branch Sentinel & Hooks</span>
+                </div>
+                <span class="pipeline-badge">Synchronized</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--brand-orange-bright);"></i>
+                  <span>Autonomous AutoFix Engine</span>
+                </div>
+                <span class="pipeline-badge">Ready</span>
+              </div>
+            </div>
+
+            <div class="preview-split-box">
+              <div class="split-box-title">
+                <i class="fa-solid fa-chart-simple" style="color: var(--brand-orange);"></i>
+                <span>Weekly Auto-Fix Verification</span>
+              </div>
+              <div class="mini-barchart">
+                <div class="bar-col"><div class="bar-fill" style="height: 40%;"></div><span class="bar-label">Mon</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 65%;"></div><span class="bar-label">Tue</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 55%;"></div><span class="bar-label">Wed</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 85%;"></div><span class="bar-label">Thu</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 70%;"></div><span class="bar-label">Fri</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 95%;"></div><span class="bar-label">Sat</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height: 90%;"></div><span class="bar-label">Sun</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 1: Dashboard (Live Telemetry & Graph Health)
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-dashboard">
+        <div class="view-header-block">
+          <h2 class="view-title">Memory Statistics & Graph Health</h2>
+          <p class="view-subtitle">Real-time graph telemetry, active memory nodes, and AI reasoning engine state</p>
+        </div>
+
+        <div class="dashboard-grid-container">
+          <div class="dashboard-stats-grid">
+            <div class="glass-stat-card">
+              <span class="card-icon">🕸️</span>
+              <div class="card-body">
+                <span class="card-number" id="dash-total-nodes">0</span>
+                <span class="card-label">Total Graph Nodes</span>
+              </div>
+            </div>
+            <div class="glass-stat-card">
+              <span class="card-icon">🪲</span>
+              <div class="card-body">
+                <span class="card-number" id="dash-bug-fixes">0</span>
+                <span class="card-label">Bug Fix Memories</span>
+              </div>
+            </div>
+            <div class="glass-stat-card">
+              <span class="card-icon">📜</span>
+              <div class="card-body">
+                <span class="card-number" id="dash-rules">0</span>
+                <span class="card-label">Consolidated Rules</span>
+              </div>
+            </div>
+            <div class="glass-stat-card">
+              <span class="card-icon">💾</span>
+              <div class="card-body">
+                <span class="card-number" id="dash-commits">0</span>
+                <span class="card-label">Commit Memories</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-details-row">
+            <div class="glass-detail-box">
+              <h4>🤖 AI Engine Reasoning Capabilities</h4>
+              <ul class="capability-list">
+                <li><span class="chk">✓</span> <strong>remember()</strong>: Ingests commit history & manual bugs into structured CodeKnowledgeGraph.</li>
+                <li><span class="chk">✓</span> <strong>recall()</strong>: Traverses relational nodes using hybrid vector + graph search.</li>
+                <li><span class="chk">✓</span> <strong>memify()</strong>: Clusters recurring bug fixes into generalized team rules.</li>
+                <li><span class="chk">✓</span> <strong>forget()</strong>: Prunes stale connections and removes decayed nodes.</li>
+              </ul>
+            </div>
+
+            <div class="glass-detail-box">
+              <h4>🛡️ Core Connection Status</h4>
+              <div class="status-rows">
+                <div class="status-row-item">
+                  <span>Cognee Graph Engine</span>
+                  <span class="badge" id="badge-cognee">Checking...</span>
+                </div>
+                <div class="status-row-item">
+                  <span>LLM Embedding Engine</span>
+                  <span class="badge" id="badge-llm">Checking...</span>
+                </div>
+                <div class="status-row-item">
+                  <span>Local Offline Fallback</span>
+                  <span class="badge" id="badge-fallback">Active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 2: Remember Bug (Ingest Memory)
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-remember">
+        <div class="view-header-block">
+          <h2 class="view-title">Ingest Bug Fix Memory</h2>
+          <p class="view-subtitle">Teach Mnemosyne about historical bugs and root causes to prevent future regressions</p>
+        </div>
+
+        <form class="glass-form" id="bug-ingest-form">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="bug-file-path">File Path <span class="req">*</span></label>
+              <input type="text" id="bug-file-path" placeholder="e.g., utils/image_processor.py" required />
+            </div>
+            <div class="form-group">
+              <label for="bug-title">Bug Summary / Title <span class="req">*</span></label>
+              <input type="text" id="bug-title" placeholder="e.g., Memory leak in thumbnail batch processing" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="bug-root-cause">Root Cause Analysis <span class="req">*</span></label>
+            <textarea id="bug-root-cause" rows="2" placeholder="Describe the underlying technical mechanism that triggered the issue..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="bug-fix-desc">Fix Description & Patterns Applied <span class="req">*</span></label>
+            <textarea id="bug-fix-desc" rows="2" placeholder="Describe the solution applied, architectural fixes, or refactoring..." required></textarea>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="bug-severity">Severity Level</label>
+              <select id="bug-severity">
+                <option value="low">Low - Minor cosmetic or non-blocking</option>
+                <option value="medium" selected>Medium - Functional defect with workaround</option>
+                <option value="high">High - System disruption or critical feature broken</option>
+                <option value="critical">Critical - Crash, data loss or security vulnerability</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="bug-tags">Tags (Comma-separated)</label>
+              <input type="text" id="bug-tags" placeholder="memory, leak, threading, pil" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="cta-btn small-btn" id="btn-submit-bug">
+              <span>💾 Ingest into Memory Graph</span>
+            </button>
+            <div class="form-message" id="bug-form-message"></div>
+          </div>
+        </form>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 3: Recall Search (Hybrid Traversal)
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-recall">
+        <div class="view-header-block">
+          <h2 class="view-title">Recall Search</h2>
+          <p class="view-subtitle">Query codebase memory using hybrid semantic embeddings + knowledge graph traversal</p>
+        </div>
+
+        <div class="search-panel-wrapper">
+          <div class="search-bar-row">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="recall-query" placeholder="Search memories, bugs, architectural lessons (e.g. 'memory leak')..." />
+            </div>
+            <div class="context-input-wrapper">
+              <input type="text" id="recall-context" placeholder="File context filter (optional)" />
+            </div>
+            <button class="cta-btn small-btn" id="btn-run-recall">Search</button>
+          </div>
+
+          <div class="search-results-container" id="recall-results-list">
+            <p class="empty-state-text">Type a query above to traverse the codebase knowledge graph.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 4: Consolidated Rules (Synthesized Team Knowledge)
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-rules">
+        <div class="view-header-block flex-header">
+          <div>
+            <h2 class="view-title">Consolidated Architectural Rules</h2>
+            <p class="view-subtitle">Team rules synthesized by AI reflection clustering across recurring bug patterns</p>
+          </div>
+          <button class="cta-btn small-btn" id="btn-reflect-rules">
+            <span>✨ Reflect & Generalize Rules</span>
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="glass-table">
+            <thead>
+              <tr>
+                <th style="width: 26%;">Rule Title</th>
+                <th style="width: 48%;">Synthesized Guidance</th>
+                <th style="width: 13%;">Domain</th>
+                <th style="width: 13%;">Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="rules-table-body">
+              <tr>
+                <td colspan="4" class="empty-state-text">Loading consolidated rules...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 5: Security Scan (Diff & Anti-Pattern Audit)
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-security">
+        <div class="view-header-block">
+          <h2 class="view-title">Security & Anti-Pattern Scanner</h2>
+          <p class="view-subtitle">Scans code diffs or local files against historical bug rules and vulnerability patterns</p>
+        </div>
+
+        <div class="scan-panel-wrapper">
+          <div class="scan-input-section">
+            <div class="scan-mode-row">
+              <label for="security-diff-input">Code Diff to Inspect</label>
+              <button type="button" class="text-action-link" id="btn-prefill-diff">Prefill Sample Vulnerability</button>
+            </div>
+            <textarea id="security-diff-input" rows="4" placeholder="Paste git diff here (+ file = open(...) without context manager)..."></textarea>
+
+            <div class="scan-file-row">
+              <input type="text" id="security-file-input" placeholder="Or enter local file path (e.g. api/index.py)" />
+              <button class="cta-btn small-btn" id="btn-run-scan">Run Security Scan</button>
+            </div>
+          </div>
+
+          <div class="scan-results-container" id="security-results-panel">
+            <h4 class="findings-heading">Vulnerability Findings</h4>
+            <div class="issues-list" id="security-issues-list">
+              <p class="empty-state-text">Paste a diff or specify a file to run the security scanning agent.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 6: Graph Visualizer (D3 Interactive Network)
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-visualizer">
+        <div class="view-header-block flex-header">
+          <div>
+            <h2 class="view-title">Knowledge Graph Visualizer</h2>
+            <p class="view-subtitle">Interactive relations between tenants, files, bugs, commits, and rules</p>
+          </div>
+          <div class="graph-legend">
+            <span class="legend-item"><span class="legend-dot tenant"></span>Tenant</span>
+            <span class="legend-item"><span class="legend-dot file"></span>File</span>
+            <span class="legend-item"><span class="legend-dot bug"></span>Bug</span>
+            <span class="legend-item"><span class="legend-dot rule"></span>Rule</span>
+            <span class="legend-item"><span class="legend-dot commit"></span>Commit</span>
+          </div>
+        </div>
+
+        <div class="visualizer-wrapper">
+          <svg id="graph-svg" class="graph-canvas"></svg>
+
+          <!-- Slide-out Node Inspector Drawer -->
+          <div class="node-inspector-drawer hide" id="node-drawer">
+            <div class="drawer-header">
+              <h4 id="drawer-node-title">Node Metadata</h4>
+              <button class="drawer-close-btn" id="drawer-close-btn">✕</button>
+            </div>
+            <div class="drawer-body" id="drawer-node-content">
+              <p class="empty-state-text">Click on any node in the graph to view relational properties.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 7: Autonomous Bug Detection & Auto-Fix
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-automate">
+        <div class="view-header-block flex-header">
+          <div>
+            <h2 class="view-title">Autonomous Bug Detection & Auto-Fix</h2>
+            <p class="view-subtitle">Upload code or select files for multi-layer scanning, memory-guided auto-repair, automated verification, and GitHub PR creation</p>
+          </div>
+          <button class="cta-btn small-btn" id="btn-refresh-jobs">
+            <span>🔄 Refresh History</span>
+          </button>
+        </div>
+
+        <div class="automation-container">
+          <!-- Step 1: Upload and Configuration Panel -->
+          <div class="automation-input-card">
+            <div class="dropzone-area" id="upload-dropzone">
+              <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+              <div class="dropzone-text">
+                <span class="dropzone-title">Drag & drop source code files here</span>
+                <span class="dropzone-sub">Supports Python (.py), JS/TS (.js, .ts), JSON, HTML, CSS (Max 10MB)</span>
+              </div>
+              <input type="file" id="automation-file-input" multiple accept=".py,.js,.jsx,.ts,.tsx,.json,.html,.css,.yaml,.yml" hidden />
+              <button type="button" class="cta-btn small-btn" id="btn-browse-file">Browse File</button>
+            </div>
+
+            <!-- Selected Files Preview & Options -->
+            <div class="automation-options-row">
+              <div class="selected-files-badge" id="selected-files-label">No files selected</div>
+              <div class="automation-flags">
+                <label class="flag-item">
+                  <input type="checkbox" id="flag-autofix" checked />
+                  <span>Auto-Apply Safe Fixes</span>
+                </label>
+                <label class="flag-item">
+                  <input type="checkbox" id="flag-create-pr" />
+                  <span>Open GitHub PR</span>
+                </label>
+                <input type="text" id="target-branch-input" placeholder="Branch" value="main" class="small-text-input" />
+              </div>
+              <button class="cta-btn small-btn action-cta" id="btn-run-automation">
+                <span>⚡ Run Autonomous Pipeline</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 2: Live Progress & Telemetry Tracker -->
+          <div class="automation-progress-card hide" id="automation-progress-box">
+            <div class="progress-header">
+              <span class="progress-title" id="automation-step-text">Initializing autonomous workspace...</span>
+              <span class="progress-percent-badge" id="automation-percent-badge">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="automation-progress-bar" style="width: 0%;"></div>
+            </div>
+            <div class="step-nodes-row">
+              <span class="step-node active" id="step-node-intake">1. Intake</span>
+              <span class="step-node" id="step-node-scan">2. Multi-Layer Scan</span>
+              <span class="step-node" id="step-node-recall">3. Memory Recall</span>
+              <span class="step-node" id="step-node-fix">4. Auto-Fix</span>
+              <span class="step-node" id="step-node-verify">5. Verification</span>
+              <span class="step-node" id="step-node-pr">6. GitHub PR</span>
+            </div>
+          </div>
+
+          <!-- Step 3: Scan Findings & Patches Output -->
+          <div class="automation-results-card hide" id="automation-results-box">
+            <div class="results-tabs-row">
+              <button class="res-tab active" data-res-tab="findings">Findings (<span id="res-findings-count">0</span>)</button>
+              <button class="res-tab" data-res-tab="diff">Patches & Diff (<span id="res-patches-count">0</span>)</button>
+              <button class="res-tab" data-res-tab="github">GitHub PR & Verification</button>
+            </div>
+
+            <!-- Tab 1: Findings List -->
+            <div class="res-panel active" id="res-panel-findings">
+              <div class="findings-scroll-list" id="automation-findings-list"></div>
+            </div>
+
+            <!-- Tab 2: Diff View -->
+            <div class="res-panel" id="res-panel-diff">
+              <div class="diff-header-bar">
+                <span class="diff-file-label" id="diff-file-label">Unified Diff</span>
+                <button class="cta-btn small-btn" id="btn-apply-local-patch">Apply to Workspace</button>
+              </div>
+              <pre class="diff-pre" id="automation-diff-display">No diff generated</pre>
+            </div>
+
+            <!-- Tab 3: GitHub & Verification Telemetry -->
+            <div class="res-panel" id="res-panel-github">
+              <div class="github-telemetry-box" id="automation-github-telemetry"></div>
+            </div>
+          </div>
+
+          <!-- Step 4: History Panel -->
+          <div class="automation-history-card">
+            <h4 class="history-title">Recent Autonomous Jobs</h4>
+            <div class="history-table-container">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Status</th>
+                    <th>Files</th>
+                    <th>Findings</th>
+                    <th>Fixes</th>
+                    <th>GitHub PR</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody id="jobs-history-body">
+                  <tr>
+                    <td colspan="7" class="empty-state-text">Loading jobs history...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 3) Stats Footer (4 Metrics Synced with Live Graph Telemetry) -->
+    <footer class="stats-footer">
+      <div class="stat-item">
+        <div class="stat-glyph">&lt;</div>
+        <div>
+          <div class="stat-value" id="stat-total-nodes-val" data-target="40" data-suffix="" data-decimals="0" data-index="0">40</div>
+          <div class="stat-label">Total Graph Nodes</div>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-glyph">%</div>
+        <div>
+          <div class="stat-value" id="stat-bug-fixes-val" data-target="7" data-suffix="" data-decimals="0" data-index="1">7</div>
+          <div class="stat-label">Bug Fix Memories</div>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-glyph">*</div>
+        <div>
+          <div class="stat-value" id="stat-rules-val" data-target="14" data-suffix="" data-decimals="0" data-index="2">14</div>
+          <div class="stat-label">Consolidated Rules</div>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-glyph">#</div>
+        <div>
+          <div class="stat-value" id="stat-commits-val" data-target="5" data-suffix="" data-decimals="0" data-index="3">5</div>
+          <div class="stat-label">Commit Memories</div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
