@@ -1,85 +1,1788 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mnemosyne — Codebase Memory Graph</title>
+  <title>Mnemosyne — Autonomous Codebase Memory & Auto-Fix</title>
 
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- BubbledotICG-FinePos font via OnlineWebFonts CDN -->
   <link
-    href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos"
-    rel="stylesheet"
-  />
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
   <!-- Font Awesome 6.5.2 -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <!-- D3.js v7 for Graph Visualizer -->
+  <!-- D3.js v7 for Knowledge Graph Visualizer -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
 
+  <style>
+/* ==========================================================================
+   MNEMOSYNE — DESIGN SYSTEM & STYLESHEET
+   Brand Identity: Dark • Minimal • Architectural • Premium • High-Craft
+   Primary Palette: #050507, #0D0F14, #14161C, #FF7900, #FFAE00, #27272F
+   ========================================================================== */
+
+:root {
+  /* Surfaces & Backgrounds */
+  --bg-primary: #050507;
+  --bg-secondary: #0D0F14;
+  --bg-tertiary: #14161C;
+  --bg-elevated: #1A1D25;
+  --bg-glass: rgba(20, 22, 28, 0.85);
+  --bg-input: rgba(10, 11, 15, 0.8);
+
+  /* Typography */
+  --text-primary: #F8F9FB;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-dark: #050507;
+
+  /* Brand Accents */
+  --brand-orange: #FF7900;
+  --brand-orange-bright: #FFAE00;
+  --brand-orange-subtle: rgba(255, 121, 0, 0.12);
+  --brand-orange-glow: rgba(255, 121, 0, 0.35);
+
+  /* Status Colors */
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-danger: #EF4444;
+  --status-info: #3B82F6;
+
+  /* Subtle Hairline Borders */
+  --border-subtle: #27272F;
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-orange: rgba(255, 121, 0, 0.4);
+
+  /* Fonts */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Transitions */
+  --transition-fast: 0.16s ease;
+  --transition-normal: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   RESET & FOUNDATIONS
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-orange);
+}
+
+/* ==========================================================================
+   BACKGROUND & HORIZON ARC
+   ========================================================================== */
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg-primary);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100vw, 1200px);
+  height: 480px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 121, 0, 0.15) 0%, rgba(255, 121, 0, 0.04) 50%, transparent 75%);
+  filter: blur(60px);
+  z-index: 1;
+}
+
+/* Horizon Arc: Clean, responsive, non-overflowing */
+.horizon-arc-wrapper {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100vw, 1000px);
+  height: 360px;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  opacity: 0.9;
+}
+
+.horizon-arc-rim {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  border-top: 2px solid var(--brand-orange-bright);
+  box-shadow:
+    0 -10px 48px rgba(255, 121, 0, 0.45),
+    0 -2px 14px rgba(255, 174, 0, 0.8),
+    inset 0 12px 36px rgba(255, 121, 0, 0.2);
+}
+
+.horizon-arc-glow {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 280px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 121, 0, 0.24) 0%, rgba(255, 121, 0, 0.06) 45%, transparent 70%);
+  filter: blur(30px);
+}
+
+/* ==========================================================================
+   PAGE WRAPPER
+   ========================================================================== */
+
+.page {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* ==========================================================================
+   STICKY HEADER & NAV CAPSULE
+   ========================================================================== */
+
+.header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(5, 5, 7, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-glass);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.logo-btn:hover {
+  opacity: 0.88;
+}
+
+.brand-logo-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Center Nav Capsule */
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.nav-link {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+  color: #FFFFFF;
+  background: linear-gradient(135deg, rgba(255, 121, 0, 0.22), rgba(255, 174, 0, 0.1));
+  border-color: var(--border-orange);
+  box-shadow: 0 0 12px rgba(255, 121, 0, 0.2);
+  font-weight: 600;
+}
+
+/* Header Status Pill */
+.header-action-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--brand-orange), var(--brand-orange-bright));
+  color: #000000;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  white-space: nowrap;
+}
+
+.header-cta-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.status-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #000000;
+  display: inline-block;
+}
+
+.status-pulse-dot.offline {
+  background-color: var(--status-danger);
+}
+
+/* Burger Button */
+.burger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.burger-bar {
+  width: 100%;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+}
+
+/* Mobile Sheet */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 110;
+}
+
+.mobile-sheet {
+  position: fixed;
+  top: 64px;
+  left: 16px;
+  right: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 120;
+}
+
+.mobile-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobile-link:hover, .mobile-link.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-orange);
+}
+
+.mobile-status-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   MAIN CONTENT AREA & VIEWS
+   ========================================================================== */
+
+.main-viewport {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px 40px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-view {
+  display: none;
+  width: 100%;
+}
+
+.page-view.active {
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.25s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Headings */
+.view-header-block {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.view-header-block.flex-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.view-title {
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.view-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--brand-orange), var(--brand-orange-bright));
+  color: #000000;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  white-space: nowrap;
+}
+
+.cta-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.cta-btn.small-btn {
+  font-size: 0.82rem;
+  padding: 7px 14px;
+}
+
+.cta-btn.secondary-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.cta-btn.secondary-btn:hover {
+  background: var(--bg-elevated);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   VIEW 0: HERO (Unslop & Perfectly Aligned)
+   ========================================================================== */
+
+.hero {
+  align-items: center;
+  text-align: center;
+  padding-top: 16px;
+}
+
+.announcement-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 4px 12px 4px 6px;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.announcement-pill:hover {
+  border-color: var(--border-orange);
+}
+
+.pill-badge {
+  background: var(--brand-orange);
+  color: #000000;
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.pill-text {
+  color: var(--text-secondary);
+}
+
+.pill-arrow {
+  color: var(--brand-orange);
+  font-size: 0.75rem;
+}
+
+.hero-headline {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  max-width: 820px;
+}
+
+.hero-highlight {
+  color: var(--text-primary);
+}
+
+.hero-subtitle {
+  font-size: 0.98rem;
+  color: var(--text-secondary);
+  max-width: 620px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.hero-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+/* Hero Preview Card */
+.hero-preview-container {
+  width: 100%;
+  max-width: 980px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.preview-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.preview-top-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.preview-window-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot-btn {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.dot-red { background: #FF5F56; }
+.dot-yellow { background: #FFBD2E; }
+.dot-green { background: #27C93F; }
+
+.preview-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.preview-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--status-success);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.preview-metric-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.preview-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.metric-trend {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.metric-trend.up { color: var(--status-success); }
+.metric-trend.orange { color: var(--brand-orange-bright); }
+
+.preview-metric-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.preview-sparkline-svg {
+  width: 100%;
+  height: 24px;
+  display: block;
+}
+
+.preview-split-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 0 16px 16px 16px;
+}
+
+.preview-split-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.split-box-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pipeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+}
+.pipeline-item:last-child { margin-bottom: 0; }
+
+.pipeline-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.pipeline-badge {
+  font-size: 0.7rem;
+  color: var(--brand-orange);
+  background: var(--brand-orange-subtle);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.mini-barchart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  height: 80px;
+  padding-top: 8px;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar-fill {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--brand-orange);
+  opacity: 0.85;
+}
+
+.bar-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   VIEW 1: DASHBOARD
+   ========================================================================== */
+
+.dashboard-grid-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.glass-stat-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.card-icon {
+  font-size: 1.6rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--brand-orange-subtle);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.card-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.dashboard-details-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.glass-detail-box {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.glass-detail-box h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.capability-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.capability-list li {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.capability-list .chk {
+  color: var(--brand-orange);
+  font-weight: bold;
+}
+
+.status-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.badge {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--status-success);
+}
+
+.badge.offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--status-danger);
+}
+
+/* ==========================================================================
+   VIEW 7: AUTONOMOUS BUG DETECTION & AUTO-FIX
+   ========================================================================== */
+
+.automation-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.automation-input-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dropzone-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  border: 2px dashed var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-input);
+  cursor: pointer;
+  text-align: center;
+  gap: 8px;
+  transition: border-color var(--transition-fast);
+}
+
+.dropzone-area:hover,
+.dropzone-area.dragover {
+  border-color: var(--brand-orange);
+}
+
+.dropzone-icon {
+  font-size: 2rem;
+  color: var(--brand-orange);
+}
+
+.dropzone-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dropzone-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.automation-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.selected-files-badge {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.automation-flags {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.flag-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.flag-item input[type="checkbox"] {
+  accent-color: var(--brand-orange);
+}
+
+.small-text-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  width: 90px;
+  outline: none;
+}
+.small-text-input:focus {
+  border-color: var(--brand-orange);
+}
+
+/* Progress Box */
+.automation-progress-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-orange);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.automation-progress-card.hide {
+  display: none;
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progress-percent-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--brand-orange);
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-orange), var(--brand-orange-bright));
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.step-nodes-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.step-node {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.step-node.active {
+  color: var(--brand-orange-bright);
+  background: var(--brand-orange-subtle);
+  font-weight: 600;
+}
+
+/* Results Box */
+.automation-results-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.automation-results-card.hide {
+  display: none;
+}
+
+.results-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
+}
+
+.res-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.res-tab.active {
+  color: #FFFFFF;
+  background: var(--brand-orange-subtle);
+  font-weight: 600;
+}
+
+.res-panel {
+  display: none;
+}
+.res-panel.active {
+  display: block;
+}
+
+.findings-scroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.diff-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.diff-file-label {
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.diff-pre {
+  background: #000000;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #E2E8F0;
+  overflow-x: auto;
+  max-height: 320px;
+  line-height: 1.45;
+}
+
+/* History Card */
+.automation-history-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.history-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.history-table-container,
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.glass-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.glass-table th {
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.glass-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.glass-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   VIEW 2: REMEMBER BUG
+   ========================================================================== */
+
+.glass-form {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.form-group label .req {
+  color: var(--brand-orange);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--brand-orange);
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.form-message {
+  font-size: 0.82rem;
+}
+.form-message.success { color: var(--status-success); }
+.form-message.error { color: var(--status-danger); }
+
+/* ==========================================================================
+   VIEW 3: RECALL SEARCH
+   ========================================================================== */
+
+.search-panel-wrapper {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 2;
+}
+
+.search-icon {
+  color: var(--brand-orange);
+  font-size: 0.9rem;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  outline: none;
+  font-size: 0.88rem;
+}
+
+.context-input-wrapper {
+  flex: 1;
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 10px;
+}
+
+.context-input-wrapper input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  outline: none;
+  font-size: 0.82rem;
+}
+
+.search-results-container {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 180px;
+}
+
+.empty-state-text {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  padding: 24px 0;
+}
+
+.memory-result-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.result-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.result-card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.strategy-badge {
+  font-size: 0.7rem;
+  color: var(--brand-orange);
+  background: var(--brand-orange-subtle);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.result-file-path {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
+
+.result-meta-body {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   VIEW 5: SECURITY SCAN
+   ========================================================================== */
+
+.scan-panel-wrapper {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.scan-input-section {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scan-mode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.text-action-link {
+  background: none;
+  border: none;
+  color: var(--brand-orange);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.scan-input-section textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.scan-file-row {
+  display: flex;
+  gap: 10px;
+}
+
+.scan-file-row input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.scan-results-container {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.findings-heading {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.issue-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.issue-card.critical { border-left: 3px solid var(--status-danger); }
+.issue-card.high { border-left: 3px solid var(--brand-orange); }
+.issue-card.medium { border-left: 3px solid var(--status-warning); }
+.issue-card.low { border-left: 3px solid var(--status-info); }
+
+.issue-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.issue-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.issue-severity {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.issue-severity.critical { background: rgba(239, 68, 68, 0.2); color: var(--status-danger); }
+.issue-severity.high { background: var(--brand-orange-subtle); color: var(--brand-orange); }
+.issue-severity.medium { background: rgba(245, 158, 11, 0.2); color: var(--status-warning); }
+.issue-severity.low { background: rgba(59, 130, 246, 0.2); color: var(--status-info); }
+
+.issue-meta {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.issue-fix {
+  font-size: 0.78rem;
+  color: var(--status-success);
+}
+
+/* ==========================================================================
+   VIEW 6: GRAPH VISUALIZER
+   ========================================================================== */
+
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.legend-dot.tenant { background: #8B5CF6; }
+.legend-dot.file { background: #3B82F6; }
+.legend-dot.bug { background: #EF4444; }
+.legend-dot.rule { background: #10B981; }
+.legend-dot.commit { background: #FF7900; }
+
+.visualizer-wrapper {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  background: #000000;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.graph-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.node-inspector-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  background: rgba(13, 15, 20, 0.95);
+  backdrop-filter: blur(12px);
+  border-left: 1px solid var(--border-subtle);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform var(--transition-normal);
+  z-index: 10;
+}
+
+.node-inspector-drawer.hide {
+  transform: translateX(100%);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
+}
+
+.drawer-header h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.drawer-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.drawer-body {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  overflow-y: auto;
+}
+
+.node-circle {
+  transition: r 0.2s ease, stroke-width 0.2s ease;
+}
+.node-circle.tenant { fill: #8B5CF6; stroke: rgba(139, 92, 246, 0.45); stroke-width: 4px; }
+.node-circle.file { fill: #3B82F6; stroke: rgba(59, 130, 246, 0.45); stroke-width: 3px; }
+.node-circle.bug { fill: #EF4444; stroke: rgba(239, 68, 68, 0.45); stroke-width: 3px; }
+.node-circle.rule { fill: #10B981; stroke: rgba(16, 185, 129, 0.45); stroke-width: 3px; }
+.node-circle.commit { fill: #FF7900; stroke: rgba(255, 121, 0, 0.45); stroke-width: 3px; }
+.node-circle:hover { stroke-width: 5px; stroke: #FFFFFF; }
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.detail-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.detail-value {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+/* ==========================================================================
+   STATS FOOTER (In Flow, Not Fixed)
+   ========================================================================== */
+
+.stats-footer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 32px auto 24px auto;
+  padding: 14px 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-glyph {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-orange);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--brand-orange-subtle);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .nav-pill { display: none; }
+  .burger-btn { display: flex; }
+  .dashboard-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .preview-grid { grid-template-columns: repeat(2, 1fr); }
+  .preview-split-row { grid-template-columns: 1fr; }
+  .dashboard-details-row { grid-template-columns: 1fr; }
+  .stats-footer { grid-template-columns: repeat(2, 1fr); }
+  .form-row-2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .header { padding: 10px 16px; }
+  .main-viewport { padding: 16px 12px; }
+  .preview-grid { grid-template-columns: 1fr; }
+  .dashboard-stats-grid { grid-template-columns: 1fr; }
+  .stats-footer { grid-template-columns: 1fr; }
+  .hero-headline { font-size: 1.8rem; }
+  .header-cta-btn { display: none; }
+}
+
+</style>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
 </head>
+
 <body>
-  <!-- Full-viewport cover video -->
+  <!-- Deep Space Canvas & Cinematic Horizon Arc Glow (Inspired by Reference 1 & 2) -->
   <div class="bg">
-    <video class="bg-video" autoplay muted loop playsinline>
-      <source
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"
-        type="video/mp4"
-      />
-    </video>
+    <div class="horizon-arc-wrapper">
+      <div class="horizon-arc-glow"></div>
+      <div class="horizon-arc-rim"></div>
+    </div>
   </div>
 
   <div class="page">
-    <!-- 1) Header -->
+    <!-- 1) Header & Navigation Bar -->
     <header class="header">
+      <!-- Official Mnemosyne Wordmark + Glowing Orb Logo (Reference Image 3) -->
       <button class="logo-btn" aria-label="Return to Home" data-tab="home">
-        <img src="assets/logo.webp" alt="Mnemosyne Logo" width="52" height="52" />
+        <svg class="brand-logo-img" viewBox="0 0 280 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="height: 30px; width: auto; display: block;">
+  <defs>
+    <filter id="glow-logo-orange" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <radialGradient id="grad-orb-sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFAE00"/>
+      <stop offset="50%" stop-color="#FF7900"/>
+      <stop offset="100%" stop-color="#CC5500"/>
+    </radialGradient>
+  </defs>
+  <text x="4" y="33" font-family="'Inter', -apple-system, 'Segoe UI', sans-serif" font-weight="800" font-size="27" letter-spacing="2.8" fill="#FFFFFF">MNEMOSYNE</text>
+  <path d="M 166 36 A 48 38 0 0 1 248 36" fill="none" stroke="#FF7900" stroke-width="2.4" stroke-linecap="round" filter="url(#glow-logo-orange)"/>
+  <circle cx="234" cy="15" r="8" fill="url(#grad-orb-sun)" filter="url(#glow-logo-orange)"/>
+</svg>
       </button>
 
+      <!-- Center Nav Capsule Pill -->
       <nav class="nav-pill" aria-label="Main Navigation">
         <button class="nav-link active" data-tab="home">Home</button>
         <button class="nav-link" data-tab="dashboard">Dashboard</button>
-        <button class="nav-link" data-tab="remember">Remember Bug</button>
-        <button class="nav-link" data-tab="recall">Recall Search</button>
+        <button class="nav-link" data-tab="automate">Auto-Fix</button>
+        <button class="nav-link" data-tab="remember">Remember</button>
+        <button class="nav-link" data-tab="recall">Recall</button>
         <button class="nav-link" data-tab="rules">Rules</button>
         <button class="nav-link" data-tab="security">Security</button>
         <button class="nav-link" data-tab="visualizer">Visualizer</button>
       </nav>
 
-      <button class="sign-in-btn" id="header-status-btn" title="View System Status" data-tab="dashboard">
-        <span class="status-pulse-dot" id="system-pulse-dot"></span>
-        <span id="system-status-text">Cognee Active</span>
-      </button>
+      <!-- Right Header Actions (Glowing Orange Status Pill) -->
+      <div class="header-action-group">
+        <button class="header-cta-btn" id="header-status-btn" title="View System Telemetry" data-tab="dashboard">
+          <span class="status-pulse-dot" id="system-pulse-dot"></span>
+          <span id="system-status-text">Cognee Active</span>
+        </button>
 
-      <button class="burger-btn" aria-label="Toggle navigation" aria-expanded="false" id="burger-btn">
-        <span class="burger-bar"></span>
-        <span class="burger-bar"></span>
-        <span class="burger-bar"></span>
-      </button>
+        <button class="burger-btn" aria-label="Toggle navigation" aria-expanded="false" id="burger-btn">
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+        </button>
+      </div>
     </header>
 
-    <!-- Mobile Menu Overlay & Sheet -->
+    <!-- Mobile Navigation Drawer & Overlay -->
     <div class="mobile-overlay" id="mobile-overlay" hidden></div>
     <div class="mobile-sheet" id="mobile-sheet" hidden aria-label="Mobile Navigation">
       <button class="mobile-link active" data-tab="home">Home</button>
-      <button class="mobile-link" data-tab="dashboard">📊 Dashboard</button>
-      <button class="mobile-link" data-tab="remember">💾 Remember Bug</button>
-      <button class="mobile-link" data-tab="recall">🔍 Recall Search</button>
-      <button class="mobile-link" data-tab="rules">📜 Consolidated Rules</button>
-      <button class="mobile-link" data-tab="security">🛡️ Security Scan</button>
-      <button class="mobile-link" data-tab="visualizer">🕸️ Graph Visualizer</button>
+      <button class="mobile-link" data-tab="dashboard">Dashboard</button>
+      <button class="mobile-link" data-tab="automate">Auto-Fix Pipeline</button>
+      <button class="mobile-link" data-tab="remember">Remember Bug</button>
+      <button class="mobile-link" data-tab="recall">Recall Search</button>
+      <button class="mobile-link" data-tab="rules">Consolidated Rules</button>
+      <button class="mobile-link" data-tab="security">Security Scan</button>
+      <button class="mobile-link" data-tab="visualizer">Graph Visualizer</button>
       <div class="mobile-status-row">
         <span class="status-pulse-dot" id="mobile-pulse-dot"></span>
         <span id="mobile-status-text">Cognee Cloud Active</span>
@@ -87,47 +1790,168 @@
     </div>
 
     <!-- =========================================================
-         Main Viewport: All Sections seamlessly styled like Pic 2
+         Main Viewport: All Modular Views
          ========================================================= -->
     <main class="main-viewport">
+
       <!-- -------------------------------------------------------
-           VIEW 0: Home Hero (Main Overview)
+           VIEW 0: Home Hero (Cinematic Layout from Reference 1 & 2)
            ------------------------------------------------------- -->
       <section class="page-view active hero" id="view-home">
-        <!-- Project Stack Pill -->
-        <div class="trust-row anim" style="--d: 0.05s">
-          <div class="tech-stack-badges">
-            <div class="tech-badge" title="Cognee AI Memory Engine">
-              <div class="inner-circle"><i class="fa-solid fa-brain"></i></div>
-            </div>
-            <div class="tech-badge" title="Git Commit & History Ingestion">
-              <div class="inner-circle"><i class="fa-brands fa-git-alt"></i></div>
-            </div>
-            <div class="tech-badge" title="Python 3.10+ Native Engine">
-              <div class="inner-circle"><i class="fa-brands fa-python"></i></div>
-            </div>
-          </div>
-          <div class="trust-pill" id="hero-status-pill">
-            <span class="status-pulse-dot" id="hero-pulse-dot"></span>
-            <span id="hero-status-text">Codebase Memory Graph</span>
-          </div>
+        <!-- What's New Badge Pill -->
+        <div class="announcement-pill" data-tab="automate">
+          <span class="pill-badge">What's New</span>
+          <span class="pill-text">Autonomous Bug Detection & Auto-Fix v2.0</span>
+          <i class="fa-solid fa-arrow-right pill-arrow"></i>
         </div>
 
-        <!-- Headline in dot-matrix font -->
-        <h1 class="headline anim">
-          <span class="headline-line headline-line-1">Mnemosyne</span>
-          <span class="headline-line headline-line-2">Codebase Memory Graph</span>
+        <!-- Headline -->
+        <h1 class="hero-headline">
+          Intelligent Codebase Memory<br />
+          <span class="hero-highlight">Powered by AI.</span>
         </h1>
 
         <!-- Subhead -->
-        <p class="subhead anim" style="--d: 0.28s">
-          Persistent memory for engineering teams. Ingests git commits, recalls bug fixes,<br />synthesizes team rules with Cognee AI, and guards against code regressions.
+        <p class="hero-subtitle">
+          Gain clarity and harness the persistent power of codebase memory with Mnemosyne.<br />
+          Autonomous multi-layer scanning, memory-guided auto-repair, and verified GitHub pull requests.
         </p>
 
-        <!-- CTA -->
-        <button class="cta-btn" id="hero-get-started-btn" style="--d: 0.4s" data-tab="dashboard">
-          <span>Explore Memory Graph</span>
-        </button>
+        <!-- CTA Buttons -->
+        <div class="hero-cta-row">
+          <button class="cta-btn" id="hero-get-started-btn" data-tab="dashboard">
+            <span>Explore Dashboard</span>
+          </button>
+          <button class="cta-btn secondary-btn" data-tab="automate">
+            <span>⚡ Run Auto-Fix</span>
+          </button>
+        </div>
+
+        <!-- Interactive Floating Live Telemetry Preview Card (Reference Image 1 & 2) -->
+        <div class="hero-preview-container">
+          <div class="preview-top-bar">
+            <div class="preview-top-left">
+              <div class="preview-window-dots">
+                <span class="dot-btn dot-red"></span>
+                <span class="dot-btn dot-yellow"></span>
+                <span class="dot-btn dot-green"></span>
+              </div>
+              <span class="preview-title">MNEMOSYNE TELEMETRY OVERVIEW</span>
+            </div>
+            <div class="preview-status-chip">
+              <span class="status-pulse-dot" style="background: var(--status-success);"></span>
+              <span>All Systems Operational</span>
+            </div>
+          </div>
+
+          <!-- 4 Metric Cards with Sparklines -->
+          <div class="preview-grid">
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>TOTAL GRAPH NODES</span>
+                <span class="metric-trend up">+4.2%</span>
+              </div>
+              <div class="preview-metric-val">72,350</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none" style="width: 100%; height: 26px; display: block; overflow: hidden;">
+                <path d="M0,18 Q20,22 40,12 T70,8 T100,4" fill="none" stroke="#10B981" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>BUGS RECALLED</span>
+                <span class="metric-trend orange">12.8%</span>
+              </div>
+              <div class="preview-metric-val">29.4%</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none" style="width: 100%; height: 26px; display: block; overflow: hidden;">
+                <path d="M0,14 Q25,6 50,16 T75,10 T100,12" fill="none" stroke="#FF7900" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>AUTO-FIX PASS RATE</span>
+                <span class="metric-trend up">+18.1%</span>
+              </div>
+              <div class="preview-metric-val">98.6%</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none" style="width: 100%; height: 26px; display: block; overflow: hidden;">
+                <path d="M0,20 Q30,14 60,8 T80,5 T100,2" fill="none" stroke="#10B981" stroke-width="2" />
+              </svg>
+            </div>
+
+            <div class="preview-metric-card">
+              <div class="preview-metric-header">
+                <span>CONSOLIDATED RULES</span>
+                <span class="metric-trend orange">10.5%</span>
+              </div>
+              <div class="preview-metric-val">92,913</div>
+              <svg class="preview-sparkline-svg" viewBox="0 0 100 24" preserveAspectRatio="none" style="width: 100%; height: 26px; display: block; overflow: hidden;">
+                <path d="M0,16 Q20,8 45,14 T70,6 T100,8" fill="none" stroke="#FF7900" stroke-width="2" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bottom Split Row: Pipelines + Activity Chart -->
+          <div class="preview-split-row">
+            <div class="preview-split-box">
+              <div class="split-box-title">
+                <i class="fa-solid fa-microchip" style="color: var(--brand-orange);"></i>
+                <span>Active Memory Pipelines</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-solid fa-brain" style="color: #8B5CF6;"></i>
+                  <span>Cognee AI Relational Graph</span>
+                </div>
+                <span class="pipeline-badge">Active</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-brands fa-git-alt" style="color: #F97316;"></i>
+                  <span>Git Branch Sentinel & Hooks</span>
+                </div>
+                <span class="pipeline-badge">Synchronized</span>
+              </div>
+              <div class="pipeline-item">
+                <div class="pipeline-name">
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--brand-orange-bright);"></i>
+                  <span>Autonomous AutoFix Engine</span>
+                </div>
+                <span class="pipeline-badge">Ready</span>
+              </div>
+            </div>
+
+            <div class="preview-split-box">
+              <div class="split-box-title">
+                <i class="fa-solid fa-chart-simple" style="color: var(--brand-orange);"></i>
+                <span>Weekly Auto-Fix Verification</span>
+              </div>
+              <div class="mini-barchart">
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 40%;"></div><span class="bar-label">Mon</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 65%;"></div><span class="bar-label">Tue</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 55%;"></div><span class="bar-label">Wed</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 85%;"></div><span class="bar-label">Thu</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 70%;"></div><span class="bar-label">Fri</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 95%;"></div><span class="bar-label">Sat</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 90%;"></div><span class="bar-label">Sun</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- -------------------------------------------------------
@@ -142,28 +1966,28 @@
         <div class="dashboard-grid-container">
           <div class="dashboard-stats-grid">
             <div class="glass-stat-card">
-              <span class="card-icon">🕸️</span>
+              <span class="card-icon"><i class="fa-solid fa-circle-nodes" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-total-nodes">0</span>
                 <span class="card-label">Total Graph Nodes</span>
               </div>
             </div>
             <div class="glass-stat-card">
-              <span class="card-icon">🪲</span>
+              <span class="card-icon"><i class="fa-solid fa-bug" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-bug-fixes">0</span>
                 <span class="card-label">Bug Fix Memories</span>
               </div>
             </div>
             <div class="glass-stat-card">
-              <span class="card-icon">📜</span>
+              <span class="card-icon"><i class="fa-solid fa-book-bookmark" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-rules">0</span>
                 <span class="card-label">Consolidated Rules</span>
               </div>
             </div>
             <div class="glass-stat-card">
-              <span class="card-icon">💾</span>
+              <span class="card-icon"><i class="fa-solid fa-code-commit" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-commits">0</span>
                 <span class="card-label">Commit Memories</span>
@@ -173,7 +1997,7 @@
 
           <div class="dashboard-details-row">
             <div class="glass-detail-box">
-              <h4>🤖 AI Engine Reasoning Capabilities</h4>
+              <h4><i class="fa-solid fa-brain" style="color: var(--brand-orange); margin-right: 6px;"></i> AI Reasoning Capabilities</h4>
               <ul class="capability-list">
                 <li><span class="chk">✓</span> <strong>remember()</strong>: Ingests commit history & manual bugs into structured CodeKnowledgeGraph.</li>
                 <li><span class="chk">✓</span> <strong>recall()</strong>: Traverses relational nodes using hybrid vector + graph search.</li>
@@ -183,7 +2007,7 @@
             </div>
 
             <div class="glass-detail-box">
-              <h4>🛡️ Core Connection Status</h4>
+              <h4><i class="fa-solid fa-shield-halved" style="color: var(--brand-orange); margin-right: 6px;"></i> Connection Status</h4>
               <div class="status-rows">
                 <div class="status-row-item">
                   <span>Cognee Graph Engine</span>
@@ -209,7 +2033,8 @@
       <section class="page-view" id="view-remember">
         <div class="view-header-block">
           <h2 class="view-title">Ingest Bug Fix Memory</h2>
-          <p class="view-subtitle">Teach Mnemosyne about historical bugs and root causes to prevent future regressions</p>
+          <p class="view-subtitle">Teach Mnemosyne about historical bugs and root causes to prevent future regressions
+          </p>
         </div>
 
         <form class="glass-form" id="bug-ingest-form">
@@ -220,18 +2045,21 @@
             </div>
             <div class="form-group">
               <label for="bug-title">Bug Summary / Title <span class="req">*</span></label>
-              <input type="text" id="bug-title" placeholder="e.g., Memory leak in thumbnail batch processing" required />
+              <input type="text" id="bug-title" placeholder="e.g., Memory leak in thumbnail batch processing"
+                required />
             </div>
           </div>
 
           <div class="form-group">
             <label for="bug-root-cause">Root Cause Analysis <span class="req">*</span></label>
-            <textarea id="bug-root-cause" rows="2" placeholder="Describe the underlying technical mechanism that triggered the issue..." required></textarea>
+            <textarea id="bug-root-cause" rows="2"
+              placeholder="Describe the underlying technical mechanism that triggered the issue..." required></textarea>
           </div>
 
           <div class="form-group">
             <label for="bug-fix-desc">Fix Description & Patterns Applied <span class="req">*</span></label>
-            <textarea id="bug-fix-desc" rows="2" placeholder="Describe the solution applied, architectural fixes, or refactoring..." required></textarea>
+            <textarea id="bug-fix-desc" rows="2"
+              placeholder="Describe the solution applied, architectural fixes, or refactoring..." required></textarea>
           </div>
 
           <div class="form-row-2">
@@ -252,7 +2080,7 @@
 
           <div class="form-actions">
             <button type="submit" class="cta-btn small-btn" id="btn-submit-bug">
-              <span>💾 Ingest into Memory Graph</span>
+              <span>Ingest Bug Fix</span>
             </button>
             <div class="form-message" id="bug-form-message"></div>
           </div>
@@ -265,14 +2093,16 @@
       <section class="page-view" id="view-recall">
         <div class="view-header-block">
           <h2 class="view-title">Recall Search</h2>
-          <p class="view-subtitle">Query codebase memory using hybrid semantic embeddings + knowledge graph traversal</p>
+          <p class="view-subtitle">Query codebase memory using hybrid semantic embeddings + knowledge graph traversal
+          </p>
         </div>
 
         <div class="search-panel-wrapper">
           <div class="search-bar-row">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="recall-query" placeholder="Search memories, bugs, architectural lessons (e.g. 'memory leak')..." />
+              <input type="text" id="recall-query"
+                placeholder="Search memories, bugs, architectural lessons (e.g. 'memory leak')..." />
             </div>
             <div class="context-input-wrapper">
               <input type="text" id="recall-context" placeholder="File context filter (optional)" />
@@ -292,11 +2122,12 @@
       <section class="page-view" id="view-rules">
         <div class="view-header-block flex-header">
           <div>
-            <h2 class="view-title" style="text-align: left;">Consolidated Architectural Rules</h2>
-            <p class="view-subtitle" style="text-align: left; margin-bottom: 0;">Team rules synthesized by AI reflection clustering across recurring bug patterns</p>
+            <h2 class="view-title">Consolidated Architectural Rules</h2>
+            <p class="view-subtitle">Team rules synthesized by AI reflection clustering across recurring bug patterns
+            </p>
           </div>
           <button class="cta-btn small-btn" id="btn-reflect-rules">
-            <span>✨ Reflect & Generalize Rules</span>
+            <span>Reflect Rules</span>
           </button>
         </div>
 
@@ -325,7 +2156,8 @@
       <section class="page-view" id="view-security">
         <div class="view-header-block">
           <h2 class="view-title">Security & Anti-Pattern Scanner</h2>
-          <p class="view-subtitle">Scans code diffs or local files against historical bug rules and vulnerability patterns</p>
+          <p class="view-subtitle">Scans code diffs or local files against historical bug rules and vulnerability
+            patterns</p>
         </div>
 
         <div class="scan-panel-wrapper">
@@ -334,7 +2166,8 @@
               <label for="security-diff-input">Code Diff to Inspect</label>
               <button type="button" class="text-action-link" id="btn-prefill-diff">Prefill Sample Vulnerability</button>
             </div>
-            <textarea id="security-diff-input" rows="4" placeholder="Paste git diff here (+ file = open(...) without context manager)..."></textarea>
+            <textarea id="security-diff-input" rows="4"
+              placeholder="Paste git diff here (+ file = open(...) without context manager)..."></textarea>
 
             <div class="scan-file-row">
               <input type="text" id="security-file-input" placeholder="Or enter local file path (e.g. api/index.py)" />
@@ -357,8 +2190,8 @@
       <section class="page-view" id="view-visualizer">
         <div class="view-header-block flex-header">
           <div>
-            <h2 class="view-title" style="text-align: left;">Knowledge Graph Visualizer</h2>
-            <p class="view-subtitle" style="text-align: left; margin-bottom: 0;">Interactive relations between tenants, files, bugs, commits, and rules</p>
+            <h2 class="view-title">Knowledge Graph Visualizer</h2>
+            <p class="view-subtitle">Interactive relations between tenants, files, bugs, commits, and rules</p>
           </div>
           <div class="graph-legend">
             <span class="legend-item"><span class="legend-dot tenant"></span>Tenant</span>
@@ -384,36 +2217,175 @@
           </div>
         </div>
       </section>
+
+      <!-- -------------------------------------------------------
+           VIEW 7: Autonomous Bug Detection & Auto-Fix
+           ------------------------------------------------------- -->
+      <section class="page-view" id="view-automate">
+        <div class="view-header-block flex-header">
+          <div>
+            <h2 class="view-title">Autonomous Bug Detection & Auto-Fix</h2>
+            <p class="view-subtitle">Upload code or select files for multi-layer scanning, memory-guided auto-repair,
+              automated verification, and GitHub PR creation</p>
+          </div>
+          <button class="cta-btn small-btn" id="btn-refresh-jobs">
+            <span>Refresh History</span>
+          </button>
+        </div>
+
+        <div class="automation-container">
+          <!-- Step 1: Upload and Configuration Panel -->
+          <div class="automation-input-card">
+            <div class="dropzone-area" id="upload-dropzone">
+              <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+              <div class="dropzone-text">
+                <span class="dropzone-title">Drag & drop source code files here</span>
+                <span class="dropzone-sub">Supports Python (.py), JS/TS (.js, .ts), JSON, HTML, CSS (Max 10MB)</span>
+              </div>
+              <input type="file" id="automation-file-input" multiple
+                accept=".py,.js,.jsx,.ts,.tsx,.json,.html,.css,.yaml,.yml" hidden />
+              <button type="button" class="cta-btn small-btn" id="btn-browse-file">Browse File</button>
+            </div>
+
+            <!-- Selected Files Preview & Options -->
+            <div class="automation-options-row">
+              <div class="selected-files-badge" id="selected-files-label">No files selected</div>
+              <div class="automation-flags">
+                <label class="flag-item">
+                  <input type="checkbox" id="flag-autofix" checked />
+                  <span>Auto-Apply Safe Fixes</span>
+                </label>
+                <label class="flag-item">
+                  <input type="checkbox" id="flag-create-pr" />
+                  <span>Open GitHub PR</span>
+                </label>
+                <input type="text" id="target-branch-input" placeholder="Branch" value="main"
+                  class="small-text-input" />
+              </div>
+              <button class="cta-btn small-btn action-cta" id="btn-run-automation">
+                <span>Run Pipeline</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 2: Live Progress & Telemetry Tracker -->
+          <div class="automation-progress-card hide" id="automation-progress-box">
+            <div class="progress-header">
+              <span class="progress-title" id="automation-step-text">Initializing autonomous workspace...</span>
+              <span class="progress-percent-badge" id="automation-percent-badge">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="automation-progress-bar" style="width: 0%;"></div>
+            </div>
+            <div class="step-nodes-row">
+              <span class="step-node active" id="step-node-intake">1. Intake</span>
+              <span class="step-node" id="step-node-scan">2. Multi-Layer Scan</span>
+              <span class="step-node" id="step-node-recall">3. Memory Recall</span>
+              <span class="step-node" id="step-node-fix">4. Auto-Fix</span>
+              <span class="step-node" id="step-node-verify">5. Verification</span>
+              <span class="step-node" id="step-node-pr">6. GitHub PR</span>
+            </div>
+          </div>
+
+          <!-- Step 3: Scan Findings & Patches Output -->
+          <div class="automation-results-card hide" id="automation-results-box">
+            <div class="results-tabs-row">
+              <button class="res-tab active" data-res-tab="findings">Findings (<span
+                  id="res-findings-count">0</span>)</button>
+              <button class="res-tab" data-res-tab="diff">Patches & Diff (<span
+                  id="res-patches-count">0</span>)</button>
+              <button class="res-tab" data-res-tab="github">GitHub PR & Verification</button>
+            </div>
+
+            <!-- Tab 1: Findings List -->
+            <div class="res-panel active" id="res-panel-findings">
+              <div class="findings-scroll-list" id="automation-findings-list"></div>
+            </div>
+
+            <!-- Tab 2: Diff View -->
+            <div class="res-panel" id="res-panel-diff">
+              <div class="diff-header-bar">
+                <span class="diff-file-label" id="diff-file-label">Unified Diff</span>
+                <button class="cta-btn small-btn" id="btn-apply-local-patch">Apply to Workspace</button>
+              </div>
+              <pre class="diff-pre" id="automation-diff-display">No diff generated</pre>
+            </div>
+
+            <!-- Tab 3: GitHub & Verification Telemetry -->
+            <div class="res-panel" id="res-panel-github">
+              <div class="github-telemetry-box" id="automation-github-telemetry"></div>
+            </div>
+          </div>
+
+          <!-- Step 4: History Panel -->
+          <div class="automation-history-card">
+            <h4 class="history-title">Recent Autonomous Jobs</h4>
+            <div class="history-table-container">
+              <table class="glass-table">
+                <thead>
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Status</th>
+                    <th>Files</th>
+                    <th>Findings</th>
+                    <th>Fixes</th>
+                    <th>GitHub PR</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody id="jobs-history-body">
+                  <tr>
+                    <td colspan="7" class="empty-state-text">Loading jobs history...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- 3) Stats Footer (4 Metrics Synced with Live Graph Telemetry) -->
     <footer class="stats-footer">
-      <div class="stat-item anim" style="--d: 0.5s">
+      <div class="stat-item">
         <div class="stat-glyph">&lt;</div>
-        <div class="stat-value" id="stat-total-nodes-val" data-target="40" data-suffix="" data-decimals="0" data-index="0">40</div>
-        <div class="stat-label">Total Graph Nodes</div>
+        <div>
+          <div class="stat-value" id="stat-total-nodes-val" data-target="40" data-suffix="" data-decimals="0"
+            data-index="0">40</div>
+          <div class="stat-label">Total Graph Nodes</div>
+        </div>
       </div>
 
-      <div class="stat-item anim" style="--d: 0.58s">
+      <div class="stat-item">
         <div class="stat-glyph">%</div>
-        <div class="stat-value" id="stat-bug-fixes-val" data-target="7" data-suffix="" data-decimals="0" data-index="1">7</div>
-        <div class="stat-label">Bug Fix Memories</div>
+        <div>
+          <div class="stat-value" id="stat-bug-fixes-val" data-target="7" data-suffix="" data-decimals="0"
+            data-index="1">7</div>
+          <div class="stat-label">Bug Fix Memories</div>
+        </div>
       </div>
 
-      <div class="stat-item anim" style="--d: 0.66s">
+      <div class="stat-item">
         <div class="stat-glyph">*</div>
-        <div class="stat-value" id="stat-rules-val" data-target="14" data-suffix="" data-decimals="0" data-index="2">14</div>
-        <div class="stat-label">Consolidated Rules</div>
+        <div>
+          <div class="stat-value" id="stat-rules-val" data-target="14" data-suffix="" data-decimals="0" data-index="2">
+            14</div>
+          <div class="stat-label">Consolidated Rules</div>
+        </div>
       </div>
 
-      <div class="stat-item anim" style="--d: 0.74s">
+      <div class="stat-item">
         <div class="stat-glyph">#</div>
-        <div class="stat-value" id="stat-commits-val" data-target="5" data-suffix="" data-decimals="0" data-index="3">5</div>
-        <div class="stat-label">Commit Memories</div>
+        <div>
+          <div class="stat-value" id="stat-commits-val" data-target="5" data-suffix="" data-decimals="0" data-index="3">
+            5</div>
+          <div class="stat-label">Commit Memories</div>
+        </div>
       </div>
     </footer>
   </div>
 
   <script src="main.js"></script>
 </body>
+
 </html>
