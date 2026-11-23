@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,16 +9,14 @@
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
   <!-- Font Awesome 6.5.2 -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- D3.js v7 for Knowledge Graph Visualizer -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -25,6 +24,7 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
 </head>
+
 <body>
   <!-- Deep Space Canvas & Cinematic Horizon Arc Glow (Inspired by Reference 1 & 2) -->
   <div class="bg">
@@ -46,7 +46,7 @@
       <nav class="nav-pill" aria-label="Main Navigation">
         <button class="nav-link active" data-tab="home">Home</button>
         <button class="nav-link" data-tab="dashboard">Dashboard</button>
-        <button class="nav-link" data-tab="automate">⚡ Auto-Fix</button>
+        <button class="nav-link" data-tab="automate">Auto-Fix</button>
         <button class="nav-link" data-tab="remember">Remember</button>
         <button class="nav-link" data-tab="recall">Recall</button>
         <button class="nav-link" data-tab="rules">Rules</button>
@@ -72,14 +72,14 @@
     <!-- Mobile Navigation Drawer & Overlay -->
     <div class="mobile-overlay" id="mobile-overlay" hidden></div>
     <div class="mobile-sheet" id="mobile-sheet" hidden aria-label="Mobile Navigation">
-      <button class="mobile-link active" data-tab="home">🏠 Home</button>
-      <button class="mobile-link" data-tab="dashboard">📊 Dashboard</button>
-      <button class="mobile-link" data-tab="automate">⚡ Auto-Fix Pipeline</button>
-      <button class="mobile-link" data-tab="remember">💾 Remember Bug</button>
-      <button class="mobile-link" data-tab="recall">🔍 Recall Search</button>
-      <button class="mobile-link" data-tab="rules">📜 Consolidated Rules</button>
-      <button class="mobile-link" data-tab="security">🛡️ Security Scan</button>
-      <button class="mobile-link" data-tab="visualizer">🕸️ Graph Visualizer</button>
+      <button class="mobile-link active" data-tab="home">Home</button>
+      <button class="mobile-link" data-tab="dashboard">Dashboard</button>
+      <button class="mobile-link" data-tab="automate">Auto-Fix Pipeline</button>
+      <button class="mobile-link" data-tab="remember">Remember Bug</button>
+      <button class="mobile-link" data-tab="recall">Recall Search</button>
+      <button class="mobile-link" data-tab="rules">Consolidated Rules</button>
+      <button class="mobile-link" data-tab="security">Security Scan</button>
+      <button class="mobile-link" data-tab="visualizer">Graph Visualizer</button>
       <div class="mobile-status-row">
         <span class="status-pulse-dot" id="mobile-pulse-dot"></span>
         <span id="mobile-status-text">Cognee Cloud Active</span>
@@ -224,13 +224,27 @@
                 <span>Weekly Auto-Fix Verification</span>
               </div>
               <div class="mini-barchart">
-                <div class="bar-col"><div class="bar-fill" style="height: 40%;"></div><span class="bar-label">Mon</span></div>
-                <div class="bar-col"><div class="bar-fill" style="height: 65%;"></div><span class="bar-label">Tue</span></div>
-                <div class="bar-col"><div class="bar-fill" style="height: 55%;"></div><span class="bar-label">Wed</span></div>
-                <div class="bar-col"><div class="bar-fill" style="height: 85%;"></div><span class="bar-label">Thu</span></div>
-                <div class="bar-col"><div class="bar-fill" style="height: 70%;"></div><span class="bar-label">Fri</span></div>
-                <div class="bar-col"><div class="bar-fill" style="height: 95%;"></div><span class="bar-label">Sat</span></div>
-                <div class="bar-col"><div class="bar-fill" style="height: 90%;"></div><span class="bar-label">Sun</span></div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 40%;"></div><span class="bar-label">Mon</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 65%;"></div><span class="bar-label">Tue</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 55%;"></div><span class="bar-label">Wed</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 85%;"></div><span class="bar-label">Thu</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 70%;"></div><span class="bar-label">Fri</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 95%;"></div><span class="bar-label">Sat</span>
+                </div>
+                <div class="bar-col">
+                  <div class="bar-fill" style="height: 90%;"></div><span class="bar-label">Sun</span>
+                </div>
               </div>
             </div>
           </div>
@@ -249,28 +263,28 @@
         <div class="dashboard-grid-container">
           <div class="dashboard-stats-grid">
             <div class="glass-stat-card">
-              <span class="card-icon">🕸️</span>
+              <span class="card-icon"><i class="fa-solid fa-circle-nodes" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-total-nodes">0</span>
                 <span class="card-label">Total Graph Nodes</span>
               </div>
             </div>
             <div class="glass-stat-card">
-              <span class="card-icon">🪲</span>
+              <span class="card-icon"><i class="fa-solid fa-bug" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-bug-fixes">0</span>
                 <span class="card-label">Bug Fix Memories</span>
               </div>
             </div>
             <div class="glass-stat-card">
-              <span class="card-icon">📜</span>
+              <span class="card-icon"><i class="fa-solid fa-book-bookmark" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-rules">0</span>
                 <span class="card-label">Consolidated Rules</span>
               </div>
             </div>
             <div class="glass-stat-card">
-              <span class="card-icon">💾</span>
+              <span class="card-icon"><i class="fa-solid fa-code-commit" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
                 <span class="card-number" id="dash-commits">0</span>
                 <span class="card-label">Commit Memories</span>
@@ -280,7 +294,7 @@
 
           <div class="dashboard-details-row">
             <div class="glass-detail-box">
-              <h4>🤖 AI Engine Reasoning Capabilities</h4>
+              <h4><i class="fa-solid fa-brain" style="color: var(--brand-orange); margin-right: 6px;"></i> AI Reasoning Capabilities</h4>
               <ul class="capability-list">
                 <li><span class="chk">✓</span> <strong>remember()</strong>: Ingests commit history & manual bugs into structured CodeKnowledgeGraph.</li>
                 <li><span class="chk">✓</span> <strong>recall()</strong>: Traverses relational nodes using hybrid vector + graph search.</li>
@@ -290,7 +304,7 @@
             </div>
 
             <div class="glass-detail-box">
-              <h4>🛡️ Core Connection Status</h4>
+              <h4><i class="fa-solid fa-shield-halved" style="color: var(--brand-orange); margin-right: 6px;"></i> Connection Status</h4>
               <div class="status-rows">
                 <div class="status-row-item">
                   <span>Cognee Graph Engine</span>
@@ -316,7 +330,8 @@
       <section class="page-view" id="view-remember">
         <div class="view-header-block">
           <h2 class="view-title">Ingest Bug Fix Memory</h2>
-          <p class="view-subtitle">Teach Mnemosyne about historical bugs and root causes to prevent future regressions</p>
+          <p class="view-subtitle">Teach Mnemosyne about historical bugs and root causes to prevent future regressions
+          </p>
         </div>
 
         <form class="glass-form" id="bug-ingest-form">
@@ -327,18 +342,21 @@
             </div>
             <div class="form-group">
               <label for="bug-title">Bug Summary / Title <span class="req">*</span></label>
-              <input type="text" id="bug-title" placeholder="e.g., Memory leak in thumbnail batch processing" required />
+              <input type="text" id="bug-title" placeholder="e.g., Memory leak in thumbnail batch processing"
+                required />
             </div>
           </div>
 
           <div class="form-group">
             <label for="bug-root-cause">Root Cause Analysis <span class="req">*</span></label>
-            <textarea id="bug-root-cause" rows="2" placeholder="Describe the underlying technical mechanism that triggered the issue..." required></textarea>
+            <textarea id="bug-root-cause" rows="2"
+              placeholder="Describe the underlying technical mechanism that triggered the issue..." required></textarea>
           </div>
 
           <div class="form-group">
             <label for="bug-fix-desc">Fix Description & Patterns Applied <span class="req">*</span></label>
-            <textarea id="bug-fix-desc" rows="2" placeholder="Describe the solution applied, architectural fixes, or refactoring..." required></textarea>
+            <textarea id="bug-fix-desc" rows="2"
+              placeholder="Describe the solution applied, architectural fixes, or refactoring..." required></textarea>
           </div>
 
           <div class="form-row-2">
@@ -359,7 +377,7 @@
 
           <div class="form-actions">
             <button type="submit" class="cta-btn small-btn" id="btn-submit-bug">
-              <span>💾 Ingest into Memory Graph</span>
+              <span>Ingest Bug Fix</span>
             </button>
             <div class="form-message" id="bug-form-message"></div>
           </div>
@@ -372,14 +390,16 @@
       <section class="page-view" id="view-recall">
         <div class="view-header-block">
           <h2 class="view-title">Recall Search</h2>
-          <p class="view-subtitle">Query codebase memory using hybrid semantic embeddings + knowledge graph traversal</p>
+          <p class="view-subtitle">Query codebase memory using hybrid semantic embeddings + knowledge graph traversal
+          </p>
         </div>
 
         <div class="search-panel-wrapper">
           <div class="search-bar-row">
             <div class="search-input-wrapper">
               <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="recall-query" placeholder="Search memories, bugs, architectural lessons (e.g. 'memory leak')..." />
+              <input type="text" id="recall-query"
+                placeholder="Search memories, bugs, architectural lessons (e.g. 'memory leak')..." />
             </div>
             <div class="context-input-wrapper">
               <input type="text" id="recall-context" placeholder="File context filter (optional)" />
@@ -400,10 +420,11 @@
         <div class="view-header-block flex-header">
           <div>
             <h2 class="view-title">Consolidated Architectural Rules</h2>
-            <p class="view-subtitle">Team rules synthesized by AI reflection clustering across recurring bug patterns</p>
+            <p class="view-subtitle">Team rules synthesized by AI reflection clustering across recurring bug patterns
+            </p>
           </div>
           <button class="cta-btn small-btn" id="btn-reflect-rules">
-            <span>✨ Reflect & Generalize Rules</span>
+            <span>Reflect Rules</span>
           </button>
         </div>
 
@@ -432,7 +453,8 @@
       <section class="page-view" id="view-security">
         <div class="view-header-block">
           <h2 class="view-title">Security & Anti-Pattern Scanner</h2>
-          <p class="view-subtitle">Scans code diffs or local files against historical bug rules and vulnerability patterns</p>
+          <p class="view-subtitle">Scans code diffs or local files against historical bug rules and vulnerability
+            patterns</p>
         </div>
 
         <div class="scan-panel-wrapper">
@@ -441,7 +463,8 @@
               <label for="security-diff-input">Code Diff to Inspect</label>
               <button type="button" class="text-action-link" id="btn-prefill-diff">Prefill Sample Vulnerability</button>
             </div>
-            <textarea id="security-diff-input" rows="4" placeholder="Paste git diff here (+ file = open(...) without context manager)..."></textarea>
+            <textarea id="security-diff-input" rows="4"
+              placeholder="Paste git diff here (+ file = open(...) without context manager)..."></textarea>
 
             <div class="scan-file-row">
               <input type="text" id="security-file-input" placeholder="Or enter local file path (e.g. api/index.py)" />
@@ -499,10 +522,11 @@
         <div class="view-header-block flex-header">
           <div>
             <h2 class="view-title">Autonomous Bug Detection & Auto-Fix</h2>
-            <p class="view-subtitle">Upload code or select files for multi-layer scanning, memory-guided auto-repair, automated verification, and GitHub PR creation</p>
+            <p class="view-subtitle">Upload code or select files for multi-layer scanning, memory-guided auto-repair,
+              automated verification, and GitHub PR creation</p>
           </div>
           <button class="cta-btn small-btn" id="btn-refresh-jobs">
-            <span>🔄 Refresh History</span>
+            <span>Refresh History</span>
           </button>
         </div>
 
@@ -515,7 +539,8 @@
                 <span class="dropzone-title">Drag & drop source code files here</span>
                 <span class="dropzone-sub">Supports Python (.py), JS/TS (.js, .ts), JSON, HTML, CSS (Max 10MB)</span>
               </div>
-              <input type="file" id="automation-file-input" multiple accept=".py,.js,.jsx,.ts,.tsx,.json,.html,.css,.yaml,.yml" hidden />
+              <input type="file" id="automation-file-input" multiple
+                accept=".py,.js,.jsx,.ts,.tsx,.json,.html,.css,.yaml,.yml" hidden />
               <button type="button" class="cta-btn small-btn" id="btn-browse-file">Browse File</button>
             </div>
 
@@ -531,10 +556,11 @@
                   <input type="checkbox" id="flag-create-pr" />
                   <span>Open GitHub PR</span>
                 </label>
-                <input type="text" id="target-branch-input" placeholder="Branch" value="main" class="small-text-input" />
+                <input type="text" id="target-branch-input" placeholder="Branch" value="main"
+                  class="small-text-input" />
               </div>
               <button class="cta-btn small-btn action-cta" id="btn-run-automation">
-                <span>⚡ Run Autonomous Pipeline</span>
+                <span>Run Pipeline</span>
               </button>
             </div>
           </div>
@@ -561,8 +587,10 @@
           <!-- Step 3: Scan Findings & Patches Output -->
           <div class="automation-results-card hide" id="automation-results-box">
             <div class="results-tabs-row">
-              <button class="res-tab active" data-res-tab="findings">Findings (<span id="res-findings-count">0</span>)</button>
-              <button class="res-tab" data-res-tab="diff">Patches & Diff (<span id="res-patches-count">0</span>)</button>
+              <button class="res-tab active" data-res-tab="findings">Findings (<span
+                  id="res-findings-count">0</span>)</button>
+              <button class="res-tab" data-res-tab="diff">Patches & Diff (<span
+                  id="res-patches-count">0</span>)</button>
               <button class="res-tab" data-res-tab="github">GitHub PR & Verification</button>
             </div>
 
@@ -619,7 +647,8 @@
       <div class="stat-item">
         <div class="stat-glyph">&lt;</div>
         <div>
-          <div class="stat-value" id="stat-total-nodes-val" data-target="40" data-suffix="" data-decimals="0" data-index="0">40</div>
+          <div class="stat-value" id="stat-total-nodes-val" data-target="40" data-suffix="" data-decimals="0"
+            data-index="0">40</div>
           <div class="stat-label">Total Graph Nodes</div>
         </div>
       </div>
@@ -627,7 +656,8 @@
       <div class="stat-item">
         <div class="stat-glyph">%</div>
         <div>
-          <div class="stat-value" id="stat-bug-fixes-val" data-target="7" data-suffix="" data-decimals="0" data-index="1">7</div>
+          <div class="stat-value" id="stat-bug-fixes-val" data-target="7" data-suffix="" data-decimals="0"
+            data-index="1">7</div>
           <div class="stat-label">Bug Fix Memories</div>
         </div>
       </div>
@@ -635,7 +665,8 @@
       <div class="stat-item">
         <div class="stat-glyph">*</div>
         <div>
-          <div class="stat-value" id="stat-rules-val" data-target="14" data-suffix="" data-decimals="0" data-index="2">14</div>
+          <div class="stat-value" id="stat-rules-val" data-target="14" data-suffix="" data-decimals="0" data-index="2">
+            14</div>
           <div class="stat-label">Consolidated Rules</div>
         </div>
       </div>
@@ -643,7 +674,8 @@
       <div class="stat-item">
         <div class="stat-glyph">#</div>
         <div>
-          <div class="stat-value" id="stat-commits-val" data-target="5" data-suffix="" data-decimals="0" data-index="3">5</div>
+          <div class="stat-value" id="stat-commits-val" data-target="5" data-suffix="" data-decimals="0" data-index="3">
+            5</div>
           <div class="stat-label">Commit Memories</div>
         </div>
       </div>
@@ -652,4 +684,5 @@
 
   <script src="main.js"></script>
 </body>
+
 </html>

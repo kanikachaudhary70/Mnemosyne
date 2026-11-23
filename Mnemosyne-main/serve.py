@@ -3,16 +3,27 @@ import uvicorn
 import sys
 from pathlib import Path
 
-# Add project root to sys.path
+# Add project roots to sys.path so it works from any directory
 root_dir = Path(__file__).resolve().parent
-if str(root_dir) not in sys.path:
-    sys.path.insert(0, str(root_dir))
+search_paths = [
+    root_dir,
+    root_dir / "mnemosyne-main",
+    root_dir / "mnemosyne-main" / "Mnemosyne-main",
+    root_dir / "Mnemosyne-main",
+    root_dir.parent / "mnemosyne-main" / "Mnemosyne-main",
+]
+for p in search_paths:
+    if p.exists() and str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 def run():
     port = 8085
     # Create dual-stack socket to support both IPv6 (::1, localhost) and IPv4 (127.0.0.1) on Windows
     sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-    sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+    try:
+        sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+    except Exception:
+        pass
     sock.bind(('::', port))
     sock.listen(128)
     
