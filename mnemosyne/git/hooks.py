@@ -13,13 +13,16 @@ logger = logging.getLogger(__name__)
 
 PRE_COMMIT_SCRIPT = """#!/usr/bin/env bash
 # Mnemosyne Git Pre-Commit Hook
-# Queries Cognee knowledge graph for related past bugs before each commit.
+# Validates staged changes against security vulnerabilities, syntax errors, and historical bugs.
+# Returns non-zero exit code on critical findings to block unsafe commits.
 
 if command -v mnemosyne > /dev/null 2>&1; then
     mnemosyne hook run --stage pre-commit
+    exit $?
 else
-    # Fallback to python execution if mnemosyne CLI is in virtualenv
-    python -m mnemosyne.cli hook run --stage pre-commit 2>/dev/null || true
+    # Fallback to python execution without unsafe error suppression
+    python -m mnemosyne.cli hook run --stage pre-commit
+    exit $?
 fi
 """
 
@@ -122,26 +125,34 @@ class HookManager:
     @classmethod
     def execute_pre_commit_check(cls, repo_root: Optional[Path] = None) -> Dict[str, Any]:
         """
-        [COGNEE PRIMITIVE: recall]
-        Queries the Cognee knowledge graph for bugs related to staged changes.
-
-        Phase 2 Upgrade: Uses session_id-scoped memory so that bugs related to
-        today's commits are prioritized over cold graph retrieval. The session
-        accumulates context as the engineer works through the day.
+        [COGNEE & AUTOMATION GATE: pre-commit]
+        Validates exact staged content and staged diff:
+        1. Scans staged changes with MultiLayerScanner for syntax and security defects.
+        2. Recalls related past bugs and rules from Cognee memory.
+        3. Flags blocking findings (Critical and High) to reject unsafe commits.
         """
+        from mnemosyne.automation.scanner import MultiLayerScanner
+        from mnemosyne.automation.models import Severity
+
         root = repo_root or find_project_root()
         staged_files = GitInspector.get_staged_files(root)
         staged_diff = GitInspector.get_staged_diff(root)
 
         client = MemoryClient(root)
+        scanner = MultiLayerScanner(memory_client=client, repo_root=root)
         warnings = []
+        all_findings = []
 
         if staged_files or staged_diff:
-            # Scope recall to today's coding session for contextual prioritization
+            # 1. Scan staged diff
+            if staged_diff:
+                diff_findings = scanner.scan_code(staged_diff, "staged diff", is_diff=True)
+                all_findings.extend(diff_findings)
+
+            # 2. Scope recall to today's coding session
             session_id = f"precommit_{datetime.now().strftime('%Y%m%d')}"
             query = f"staged files: {' '.join(staged_files[:5])} {staged_diff[:300]}"
 
-            # Store the pre-commit context as session memory for future prioritization
             if client._init_cognee_if_needed():
                 try:
                     import cognee
@@ -154,7 +165,13 @@ class HookManager:
                 except Exception as e:
                     logger.debug(f"Session memory update failed: {e}")
 
+            # 3. Analyze exact staged content of each staged file
             for file_path in staged_files:
+                staged_text = GitInspector.get_staged_content(root, file_path)
+                if staged_text:
+                    file_findings = scanner.scan_code(staged_text, file_path)
+                    all_findings.extend(file_findings)
+
                 recalled = client.recall(
                     query=query,
                     file_context=file_path,
@@ -165,9 +182,18 @@ class HookManager:
                     if mem not in warnings:
                         warnings.append(mem)
 
+        # Blocking findings: any Critical or High severity defect
+        blocking_findings = [
+            f for f in all_findings
+            if f.severity in (Severity.CRITICAL, Severity.HIGH)
+        ]
+
         return {
             "staged_files": staged_files,
             "warnings": warnings,
+            "findings": all_findings,
+            "blocking_findings": blocking_findings,
+            "blocked": len(blocking_findings) > 0,
         }
 
     @classmethod

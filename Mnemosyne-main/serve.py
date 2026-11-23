@@ -3,13 +3,13 @@ import uvicorn
 import sys
 from pathlib import Path
 
-# Add project roots to sys.path so it works from any directory
+# Add project roots to sys.path with Mnemosyne-main first
 root_dir = Path(__file__).resolve().parent
 search_paths = [
-    root_dir,
-    root_dir / "mnemosyne-main",
     root_dir / "mnemosyne-main" / "Mnemosyne-main",
     root_dir / "Mnemosyne-main",
+    root_dir / "mnemosyne-main",
+    root_dir,
     root_dir.parent / "mnemosyne-main" / "Mnemosyne-main",
 ]
 for p in search_paths:

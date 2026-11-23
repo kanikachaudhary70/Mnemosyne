@@ -342,16 +342,18 @@ button, input, select, textarea {
   border-radius: 2px;
 }
 
-/* Mobile Sheet */
+/* Mobile Sheet & Overlay - Strict Display None by Default */
 .mobile-overlay {
+  display: none !important;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   z-index: 110;
 }
 
 .mobile-sheet {
+  display: none !important;
   position: fixed;
   top: 64px;
   left: 16px;
@@ -360,10 +362,22 @@ button, input, select, textarea {
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   padding: 16px;
-  display: flex;
   flex-direction: column;
   gap: 8px;
   z-index: 120;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 900px) {
+  .mobile-overlay.active,
+  .mobile-overlay:not([hidden]) {
+    display: block !important;
+  }
+
+  .mobile-sheet.active,
+  .mobile-sheet:not([hidden]) {
+    display: flex !important;
+  }
 }
 
 .mobile-link {
@@ -1773,8 +1787,8 @@ button, input, select, textarea {
     </header>
 
     <!-- Mobile Navigation Drawer & Overlay -->
-    <div class="mobile-overlay" id="mobile-overlay" hidden></div>
-    <div class="mobile-sheet" id="mobile-sheet" hidden aria-label="Mobile Navigation">
+    <div class="mobile-overlay" id="mobile-overlay" hidden style="display: none !important;"></div>
+    <div class="mobile-sheet" id="mobile-sheet" hidden style="display: none !important;" aria-label="Mobile Navigation">
       <button class="mobile-link active" data-tab="home">Home</button>
       <button class="mobile-link" data-tab="dashboard">Dashboard</button>
       <button class="mobile-link" data-tab="automate">Auto-Fix Pipeline</button>
@@ -1968,28 +1982,28 @@ button, input, select, textarea {
             <div class="glass-stat-card">
               <span class="card-icon"><i class="fa-solid fa-circle-nodes" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
-                <span class="card-number" id="dash-total-nodes">0</span>
+                <span class="card-number" id="dash-total-nodes">34</span>
                 <span class="card-label">Total Graph Nodes</span>
               </div>
             </div>
             <div class="glass-stat-card">
               <span class="card-icon"><i class="fa-solid fa-bug" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
-                <span class="card-number" id="dash-bug-fixes">0</span>
+                <span class="card-number" id="dash-bug-fixes">7</span>
                 <span class="card-label">Bug Fix Memories</span>
               </div>
             </div>
             <div class="glass-stat-card">
               <span class="card-icon"><i class="fa-solid fa-book-bookmark" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
-                <span class="card-number" id="dash-rules">0</span>
+                <span class="card-number" id="dash-rules">11</span>
                 <span class="card-label">Consolidated Rules</span>
               </div>
             </div>
             <div class="glass-stat-card">
               <span class="card-icon"><i class="fa-solid fa-code-commit" style="color: var(--brand-orange);"></i></span>
               <div class="card-body">
-                <span class="card-number" id="dash-commits">0</span>
+                <span class="card-number" id="dash-commits">5</span>
                 <span class="card-label">Commit Memories</span>
               </div>
             </div>

@@ -318,16 +318,18 @@ button, input, select, textarea {
   border-radius: 2px;
 }
 
-/* Mobile Sheet */
+/* Mobile Sheet & Overlay - Strict Display None by Default */
 .mobile-overlay {
+  display: none !important;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   z-index: 110;
 }
 
 .mobile-sheet {
+  display: none !important;
   position: fixed;
   top: 64px;
   left: 16px;
@@ -336,10 +338,22 @@ button, input, select, textarea {
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   padding: 16px;
-  display: flex;
   flex-direction: column;
   gap: 8px;
   z-index: 120;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 900px) {
+  .mobile-overlay.active,
+  .mobile-overlay:not([hidden]) {
+    display: block !important;
+  }
+
+  .mobile-sheet.active,
+  .mobile-sheet:not([hidden]) {
+    display: flex !important;
+  }
 }
 
 .mobile-link {

@@ -102,15 +102,31 @@ document.addEventListener("DOMContentLoaded", () => {
   function openMobileMenu() {
     if (!burgerBtn) return;
     burgerBtn.setAttribute("aria-expanded", "true");
-    if (mobileOverlay) mobileOverlay.removeAttribute("hidden");
-    if (mobileSheet) mobileSheet.removeAttribute("hidden");
+    if (mobileOverlay) {
+      mobileOverlay.removeAttribute("hidden");
+      mobileOverlay.style.setProperty("display", "block", "important");
+      mobileOverlay.classList.add("active");
+    }
+    if (mobileSheet) {
+      mobileSheet.removeAttribute("hidden");
+      mobileSheet.style.setProperty("display", "flex", "important");
+      mobileSheet.classList.add("active");
+    }
   }
 
   function closeMobileMenu() {
     if (!burgerBtn) return;
     burgerBtn.setAttribute("aria-expanded", "false");
-    if (mobileOverlay) mobileOverlay.setAttribute("hidden", "");
-    if (mobileSheet) mobileSheet.setAttribute("hidden", "");
+    if (mobileOverlay) {
+      mobileOverlay.setAttribute("hidden", "");
+      mobileOverlay.style.setProperty("display", "none", "important");
+      mobileOverlay.classList.remove("active");
+    }
+    if (mobileSheet) {
+      mobileSheet.setAttribute("hidden", "");
+      mobileSheet.style.setProperty("display", "none", "important");
+      mobileSheet.classList.remove("active");
+    }
   }
 
   function toggleMobileMenu() {

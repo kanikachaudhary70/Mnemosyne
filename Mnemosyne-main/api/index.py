@@ -401,38 +401,57 @@ from api.static_assets import HTML_CONTENT, CSS_CONTENT, JS_CONTENT
 
 @app.get("/", response_class=HTMLResponse)
 def get_index():
-    try:
-        public_index = root_dir / "public" / "index.html"
-        if public_index.exists():
-            return HTMLResponse(content=public_index.read_text(encoding="utf-8"))
-    except Exception:
-        pass
+    candidates = [
+        root_dir / "public" / "index.html",
+        root_dir / "index.html",
+        root_dir / "Mnemosyne-main" / "public" / "index.html",
+        root_dir.parent / "index.html",
+        root_dir.parent / "public" / "index.html",
+    ]
+    for c in candidates:
+        if c.exists():
+            try:
+                return HTMLResponse(content=c.read_text(encoding="utf-8"))
+            except Exception:
+                pass
     return HTMLResponse(content=HTML_CONTENT)
 
 @app.get("/styles.css")
 @app.get("/style.css")
 def get_css():
-    try:
-        public_css = root_dir / "public" / "styles.css"
-        if not public_css.exists():
-            public_css = root_dir / "public" / "style.css"
-        if public_css.exists():
-            return Response(content=public_css.read_text(encoding="utf-8"), media_type="text/css")
-    except Exception:
-        pass
+    candidates = [
+        root_dir / "public" / "styles.css",
+        root_dir / "public" / "style.css",
+        root_dir / "styles.css",
+        root_dir / "Mnemosyne-main" / "public" / "styles.css",
+        root_dir.parent / "styles.css",
+        root_dir.parent / "public" / "styles.css",
+    ]
+    for c in candidates:
+        if c.exists():
+            try:
+                return Response(content=c.read_text(encoding="utf-8"), media_type="text/css")
+            except Exception:
+                pass
     return Response(content=CSS_CONTENT, media_type="text/css")
 
 @app.get("/main.js")
 @app.get("/app.js")
 def get_js():
-    try:
-        public_js = root_dir / "public" / "main.js"
-        if not public_js.exists():
-            public_js = root_dir / "public" / "app.js"
-        if public_js.exists():
-            return Response(content=public_js.read_text(encoding="utf-8"), media_type="application/javascript")
-    except Exception:
-        pass
+    candidates = [
+        root_dir / "public" / "main.js",
+        root_dir / "public" / "app.js",
+        root_dir / "main.js",
+        root_dir / "Mnemosyne-main" / "public" / "main.js",
+        root_dir.parent / "main.js",
+        root_dir.parent / "public" / "main.js",
+    ]
+    for c in candidates:
+        if c.exists():
+            try:
+                return Response(content=c.read_text(encoding="utf-8"), media_type="application/javascript")
+            except Exception:
+                pass
     return Response(content=JS_CONTENT, media_type="application/javascript")
 
 @app.get("/assets/{asset_name:path}")

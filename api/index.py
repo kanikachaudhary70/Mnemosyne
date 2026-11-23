@@ -2,10 +2,10 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # Add project root to sys.path so we can import from mnemosyne package
 root_dir = Path(__file__).resolve().parent.parent
@@ -15,6 +15,9 @@ from mnemosyne.memory.client import MemoryClient
 from mnemosyne.memory.schemas import BugFixMemory, MemoryType
 from mnemosyne.memory.consolidator import MemoryConsolidator
 from mnemosyne.utils.security_scanner import SecurityScanner
+from mnemosyne.automation.engine import AutomationEngine
+from mnemosyne.automation.reporter import AutomationReporter
+from mnemosyne.automation.workspace import WorkspaceSecurityError
 
 app = FastAPI(title="Mnemosyne Web API", version="0.1.0")
 
@@ -126,6 +129,15 @@ def get_rules():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class AutomateRequest(BaseModel):
+    source_files: Optional[List[str]] = Field(default_factory=list)
+    auto_fix: bool = True
+    create_pr: bool = False
+    target_branch: str = "main"
+
+class ApplyFixRequest(BaseModel):
+    file_path: str
+
 @app.post("/api/scan-security")
 def scan_security(data: SecurityInput):
     try:
@@ -133,7 +145,13 @@ def scan_security(data: SecurityInput):
         scanner = SecurityScanner(client)
         
         if data.file_path:
-            file_path = root_dir / data.file_path
+            # Prevent directory traversal
+            clean_rel = Path(data.file_path).as_posix().lstrip("/\\")
+            if ".." in Path(clean_rel).parts:
+                raise HTTPException(status_code=400, detail="Path traversal forbidden")
+            file_path = (root_dir / clean_rel).resolve()
+            if not str(file_path).startswith(str(root_dir.resolve())):
+                raise HTTPException(status_code=400, detail="Target path escapes project root")
             if not file_path.exists():
                 raise HTTPException(status_code=400, detail=f"File {data.file_path} not found")
             issues = scanner.scan_file(file_path)
@@ -143,6 +161,144 @@ def scan_security(data: SecurityInput):
             raise HTTPException(status_code=400, detail="Must provide either file_path or diff_text")
             
         return {"issues": [i.model_dump() for i in issues]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ---------------------------------------------------------------------------
+# Autonomous Bug Detection & Auto-Fix Endpoints (Phases 2, 3, 5, 8, 9)
+# ---------------------------------------------------------------------------
+
+@app.post("/api/upload")
+async def upload_files(
+    files: List[UploadFile] = File(...),
+    auto_fix: bool = True,
+    create_pr: bool = False,
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+):
+    """
+    Secure file intake endpoint:
+    Validates file extensions, size (< 10MB), and paths.
+    Creates an isolated workspace and launches autonomous analysis job.
+    """
+    try:
+        engine = AutomationEngine(root_dir)
+        payloads: Dict[str, bytes] = {}
+        filenames: List[str] = []
+
+        for upload in files:
+            filename = Path(upload.filename).name  # Prevent directory traversal
+            content = await upload.read()
+            if len(content) > 10 * 1024 * 1024:
+                raise HTTPException(status_code=400, detail=f"File {filename} exceeds 10MB limit")
+            payloads[filename] = content
+            filenames.append(filename)
+
+        job = engine.create_job(source_files=filenames, auto_fix=auto_fix, create_pr=create_pr)
+        # Run job in background worker
+        engine.run_job_async(job.job_id, file_payloads=payloads)
+
+        return {
+            "status": "queued",
+            "job_id": job.job_id,
+            "files": filenames,
+            "message": "Files received into isolated workspace; scanning started",
+        }
+    except WorkspaceSecurityError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/automate")
+def trigger_automation(data: AutomateRequest):
+    """Trigger automated scan & fix pipeline on specified repository files."""
+    try:
+        engine = AutomationEngine(root_dir)
+        source_files = data.source_files or []
+        if not source_files:
+            # Check for staged files if none specified
+            from mnemosyne.git.inspector import GitInspector
+            source_files = GitInspector.get_staged_files(root_dir)
+
+        if not source_files:
+            raise HTTPException(status_code=400, detail="No source files provided or staged")
+
+        # Validate that files reside safely within repository
+        for sf in source_files:
+            clean = Path(sf).as_posix().lstrip("/\\")
+            if ".." in Path(clean).parts:
+                raise HTTPException(status_code=400, detail=f"Path traversal detected in file: {sf}")
+
+        job = engine.create_job(
+            source_files=source_files,
+            auto_fix=data.auto_fix,
+            create_pr=data.create_pr,
+            target_branch=data.target_branch,
+        )
+        engine.run_job_async(job.job_id)
+
+        return {
+            "status": "queued",
+            "job_id": job.job_id,
+            "source_files": source_files,
+            "message": "Automation job initiated in background",
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/jobs")
+def list_automation_jobs():
+    """List recent automation jobs for the dashboard history panel."""
+    try:
+        engine = AutomationEngine(root_dir)
+        jobs = engine.list_jobs()
+        return {"jobs": [AutomationReporter.format_job_summary(j) for j in jobs[:20]]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/jobs/{job_id}")
+def get_job_status(job_id: str):
+    """Retrieve real-time telemetry, findings, verification, and PR results for a job."""
+    try:
+        engine = AutomationEngine(root_dir)
+        job = engine.get_job(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+        return AutomationReporter.format_job_summary(job)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/jobs/{job_id}/apply")
+def apply_verified_patch(job_id: str, data: ApplyFixRequest):
+    """Apply a verified patch from a completed job directly into working copy."""
+    try:
+        engine = AutomationEngine(root_dir)
+        job = engine.get_job(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+
+        matching_patch = next((p for p in job.patches if p.file_path == data.file_path), None)
+        if not matching_patch:
+            raise HTTPException(status_code=404, detail=f"No patch found for {data.file_path} in job {job_id}")
+
+        clean = Path(data.file_path).as_posix().lstrip("/\\")
+        if ".." in Path(clean).parts:
+            raise HTTPException(status_code=400, detail="Path traversal detected")
+        dest = (root_dir / clean).resolve()
+        if not str(dest).startswith(str(root_dir.resolve())):
+            raise HTTPException(status_code=400, detail="Target path escapes project root")
+
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(matching_patch.patched_content, encoding="utf-8")
+
+        return {"status": "success", "message": f"Verified patch applied to {data.file_path}"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -239,37 +395,83 @@ def get_graph_data():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi import Response
 from api.static_assets import HTML_CONTENT, CSS_CONTENT, JS_CONTENT
 
 @app.get("/", response_class=HTMLResponse)
 def get_index():
-    try:
-        public_index = root_dir / "public" / "index.html"
-        if public_index.exists():
-            return HTMLResponse(content=public_index.read_text(encoding="utf-8"))
-    except Exception:
-        pass
+    candidates = [
+        root_dir / "public" / "index.html",
+        root_dir / "index.html",
+        root_dir / "Mnemosyne-main" / "public" / "index.html",
+        root_dir.parent / "index.html",
+        root_dir.parent / "public" / "index.html",
+    ]
+    for c in candidates:
+        if c.exists():
+            try:
+                return HTMLResponse(content=c.read_text(encoding="utf-8"))
+            except Exception:
+                pass
     return HTMLResponse(content=HTML_CONTENT)
 
+@app.get("/styles.css")
 @app.get("/style.css")
 def get_css():
-    try:
-        public_css = root_dir / "public" / "style.css"
-        if public_css.exists():
-            return Response(content=public_css.read_text(encoding="utf-8"), media_type="text/css")
-    except Exception:
-        pass
+    candidates = [
+        root_dir / "public" / "styles.css",
+        root_dir / "public" / "style.css",
+        root_dir / "styles.css",
+        root_dir / "Mnemosyne-main" / "public" / "styles.css",
+        root_dir.parent / "styles.css",
+        root_dir.parent / "public" / "styles.css",
+    ]
+    for c in candidates:
+        if c.exists():
+            try:
+                return Response(content=c.read_text(encoding="utf-8"), media_type="text/css")
+            except Exception:
+                pass
     return Response(content=CSS_CONTENT, media_type="text/css")
 
+@app.get("/main.js")
 @app.get("/app.js")
 def get_js():
-    try:
-        public_js = root_dir / "public" / "app.js"
-        if public_js.exists():
-            return Response(content=public_js.read_text(encoding="utf-8"), media_type="application/javascript")
-    except Exception:
-        pass
+    candidates = [
+        root_dir / "public" / "main.js",
+        root_dir / "public" / "app.js",
+        root_dir / "main.js",
+        root_dir / "Mnemosyne-main" / "public" / "main.js",
+        root_dir.parent / "main.js",
+        root_dir.parent / "public" / "main.js",
+    ]
+    for c in candidates:
+        if c.exists():
+            try:
+                return Response(content=c.read_text(encoding="utf-8"), media_type="application/javascript")
+            except Exception:
+                pass
     return Response(content=JS_CONTENT, media_type="application/javascript")
+
+@app.get("/assets/{asset_name:path}")
+def get_asset(asset_name: str):
+    asset_path = root_dir / "public" / "assets" / asset_name
+    if not asset_path.exists():
+        asset_path = root_dir / "assets" / asset_name
+    if asset_path.exists():
+        media_type = "image/webp" if asset_name.endswith(".webp") else "application/octet-stream"
+        return FileResponse(asset_path, media_type=media_type)
+    raise HTTPException(status_code=404, detail="Asset not found")
+
+@app.get("/fonts/{font_name:path}")
+def get_font(font_name: str):
+    font_path = root_dir / "public" / "fonts" / font_name
+    if not font_path.exists():
+        font_path = root_dir / "fonts" / font_name
+    if font_path.exists():
+        media_type = "font/woff2" if font_name.endswith(".woff2") else "application/octet-stream"
+        return FileResponse(font_path, media_type=media_type)
+    raise HTTPException(status_code=404, detail="Font not found")
+
 

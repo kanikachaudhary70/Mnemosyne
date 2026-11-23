@@ -1070,6 +1070,7 @@ def hook_run_cmd(
     if stage == "pre-commit":
         result = HookManager.execute_pre_commit_check(root)
         warnings = result.get("warnings", [])
+        blocking_findings = result.get("blocking_findings", [])
 
         if warnings and not silent:
             console.print("\n[bold yellow]════════════════════════════════════════════════════════════════[/bold yellow]")
@@ -1079,33 +1080,222 @@ def hook_run_cmd(
             for w in warnings:
                 console.print(render_memory_warning(w))
             console.print("[dim]Review past bug history above before completing this commit.[/dim]\n")
-            console.print("[dim]Run 'mnemosyne feedback --helpful' or '--not-helpful' to improve future recalls.[/dim]\n")
 
-        # Run Security Scan on staged changes
-        from mnemosyne.git.inspector import GitInspector
-        staged_diff = GitInspector.get_staged_diff(root)
-        if staged_diff and not silent:
-            from mnemosyne.utils.security_scanner import SecurityScanner
-            from mnemosyne.memory.client import MemoryClient
-            client = MemoryClient(root)
-            scanner = SecurityScanner(client)
-            sec_issues = scanner.scan_diff(staged_diff)
-            if sec_issues:
-                console.print("\n[bold red]🛡️  🛡️  MNEMOSYNE AUTOMATIC SECURITY SCAN WARNINGS  🛡️  🛡️[/bold red]")
+        if blocking_findings:
+            if not silent:
+                console.print("\n[bold red]🛑  MNEMOSYNE COMMIT REJECTED — BLOCKING DEFECTS DETECTED  🛑[/bold red]")
                 console.print("[bold red]════════════════════════════════════════════════════════════════[/bold red]\n")
-                for issue in sec_issues:
-                    severity_colors = {"low": "blue", "medium": "yellow", "high": "orange3", "critical": "bold red"}
-                    color = severity_colors.get(issue.severity.lower(), "white")
-                    severity_badge = f"[{color}]{issue.severity.upper()}[/{color}]"
-                    title = f"[{color}]● {issue.vulnerability_type}[/{color}] - {severity_badge}"
-                    details = f"  [bold]Description:[/bold] {issue.description}\n  [bold]Proposed Fix:[/bold] {issue.proposed_fix}"
-                    if issue.matching_memory_id:
-                        details += f"\n  [bold]Matching past memory/rule:[/bold] [cyan]{issue.matching_memory_id}[/cyan]"
-                    console.print(Panel(details, title=title, border_style=color))
-                console.print("\n[bold red]⚠️  Please review and resolve the security issues above before committing.[/bold red]\n")
+                for f in blocking_findings:
+                    severity_badge = f"[bold red]{f.severity.value.upper()}[/bold red]"
+                    title = f"[bold red]● {f.category} in {f.file_path}:{f.line_number or 1}[/bold red] - {severity_badge}"
+                    details = f"  [bold]Rule:[/bold] {f.rule_id}\n  [bold]Description:[/bold] {f.description}\n  [bold]Suggested Fix:[/bold] {f.suggested_fix or 'Resolve manually'}"
+                    console.print(Panel(details, title=title, border_style="red"))
+                console.print("\n[bold red]❌ Pre-commit check failed. Resolve the blocking defects or run 'mnemosyne autofix' before committing.[/bold red]\n")
+            raise typer.Exit(code=1)
+        elif not silent:
+            console.print("[bold green]✓ Pre-commit checks passed: No blocking vulnerabilities detected in staged changes.[/bold green]\n")
 
     elif stage == "post-commit":
         HookManager.execute_post_commit_ingest(root, silent=silent)
+
+
+# ---------------------------------------------------------------------------
+# Autonomous Detection, Auto-Fix & Automation CLI Commands (Phase 11)
+# ---------------------------------------------------------------------------
+
+@app.command("scan")
+def scan_cmd(
+    file_path: Optional[str] = typer.Option(None, "--file", "-f", help="Specific file path to scan"),
+    staged: bool = typer.Option(False, "--staged", "-s", help="Scan staged git changes"),
+    json_output: bool = typer.Option(False, "--json", help="Output results in JSON format"),
+):
+    """
+    Scan code for syntax errors, linting issues, security vulnerabilities, and historical bug patterns.
+    """
+    from mnemosyne.automation.scanner import MultiLayerScanner
+    from mnemosyne.memory.client import MemoryClient
+
+    root = find_project_root()
+    client = MemoryClient(root)
+    scanner = MultiLayerScanner(memory_client=client, repo_root=root)
+
+    findings = []
+    if file_path:
+        target = Path(file_path)
+        if not target.is_absolute():
+            target = root / target
+        if not target.exists():
+            console.print(f"[red]Error: File {file_path} does not exist.[/red]")
+            raise typer.Exit(code=1)
+        content = target.read_text(encoding="utf-8", errors="replace")
+        findings = scanner.scan_code(content, file_path)
+    elif staged:
+        staged_files = GitInspector.get_staged_files(root)
+        for sf in staged_files:
+            text = GitInspector.get_staged_content(root, sf)
+            if text:
+                findings.extend(scanner.scan_code(text, sf))
+    else:
+        # Scan staged diff by default
+        staged_diff = GitInspector.get_staged_diff(root)
+        if staged_diff:
+            findings = scanner.scan_code(staged_diff, "staged diff", is_diff=True)
+        else:
+            console.print("[yellow]No staged changes to scan. Use --file <path> or stage changes with git add.[/yellow]")
+            return
+
+    if json_output:
+        import json as json_mod
+        console.print(json_mod.dumps([f.model_dump() for f in findings], indent=2))
+        return
+
+    if not findings:
+        console.print("\n[bold green]✓ Clean code! No syntax, lint, or security issues detected.[/bold green]\n")
+        return
+
+    console.print(f"\n[bold yellow]🔍 Detected {len(findings)} issue(s):[/bold yellow]\n")
+    for f in findings:
+        color = "red" if f.severity.value in ("critical", "high") else "yellow" if f.severity.value == "medium" else "blue"
+        console.print(f"  • [{color}][{f.severity.value.upper()}][/{color}] [bold]{f.category}[/bold] in [cyan]{f.file_path}:{f.line_number or 1}[/cyan] ({f.rule_id})")
+        console.print(f"    [dim]{f.description}[/dim]")
+        if f.matching_memory_ids:
+            console.print(f"    [dim cyan]Associated past bug memory: {', '.join(f.matching_memory_ids)}[/dim cyan]")
+        console.print()
+
+
+@app.command("autofix")
+def autofix_cmd(
+    file_path: str = typer.Option(..., "--file", "-f", help="Target file path to fix"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Display patch without writing to file"),
+):
+    """
+    Automatically detect and repair fixable code issues in a file.
+    """
+    from mnemosyne.automation.engine import AutomationEngine
+
+    root = find_project_root()
+    engine = AutomationEngine(root)
+
+    target = Path(file_path)
+    if not target.is_absolute():
+        target = root / target
+    if not target.exists():
+        console.print(f"[red]Error: File {file_path} not found.[/red]")
+        raise typer.Exit(code=1)
+
+    rel_path = str(target.relative_to(root)).replace("\\", "/")
+    job = engine.create_job(source_files=[rel_path], auto_fix=True, create_pr=False)
+    engine.run_job_sync(job.job_id)
+
+    job_result = engine.get_job(job.job_id)
+    if not job_result:
+        return
+
+    console.print(f"\n[bold cyan]Job ID: {job_result.job_id}[/bold cyan] - Status: [bold]{job_result.status.value.upper()}[/bold]")
+    if job_result.patches:
+        for p in job_result.patches:
+            console.print(f"\n[bold green]Unified Patch for {p.file_path} ({p.fix_type}):[/bold green]")
+            console.print(p.diff_unified)
+            if not dry_run:
+                target.write_text(p.patched_content, encoding="utf-8")
+                console.print(f"[bold green]✓ Successfully applied verified patch to {file_path}[/bold green]\n")
+    else:
+        console.print("[dim]No auto-fixable patches generated.[/dim]\n")
+
+
+@app.command("automate")
+def automate_cmd(
+    file_path: Optional[str] = typer.Option(None, "--file", "-f", help="Specific file path to automate"),
+    create_pr: bool = typer.Option(False, "--create-pr", help="Automatically create GitHub branch and PR"),
+    branch: str = typer.Option("main", "--branch", "-b", help="Target branch for PR"),
+):
+    """
+    Execute full autonomous lifecycle: Scan -> Recall -> Fix -> Verify -> GitHub PR -> Memory.
+    """
+    from mnemosyne.automation.engine import AutomationEngine
+    from mnemosyne.automation.reporter import AutomationReporter
+
+    root = find_project_root()
+    engine = AutomationEngine(root)
+
+    files = []
+    if file_path:
+        target = Path(file_path)
+        if not target.is_absolute():
+            target = root / target
+        if not target.exists():
+            console.print(f"[red]Error: File {file_path} not found.[/red]")
+            raise typer.Exit(code=1)
+        files.append(str(target.relative_to(root)).replace("\\", "/"))
+    else:
+        staged = GitInspector.get_staged_files(root)
+        if staged:
+            files = staged
+        else:
+            console.print("[yellow]No files specified. Pass --file <path> or stage changes.[/yellow]")
+            return
+
+    console.print(f"\n[bold cyan]🚀 Starting autonomous workflow for {len(files)} file(s)...[/bold cyan]")
+    job = engine.create_job(source_files=files, auto_fix=True, create_pr=create_pr, target_branch=branch)
+    engine.run_job_sync(job.job_id)
+
+    updated_job = engine.get_job(job.job_id)
+    if updated_job:
+        console.print(AutomationReporter.format_console_text(updated_job))
+
+
+@app.command("jobs")
+def jobs_cmd():
+    """List recent autonomous bug detection and fixing jobs."""
+    from mnemosyne.automation.engine import AutomationEngine
+
+    root = find_project_root()
+    engine = AutomationEngine(root)
+    jobs = engine.list_jobs()
+
+    if not jobs:
+        console.print("[dim]No automation jobs recorded yet.[/dim]")
+        return
+
+    table = Table(title="Autonomous Jobs History", border_style="cyan")
+    table.add_column("Job ID", style="cyan")
+    table.add_column("Status", style="bold")
+    table.add_column("Files", style="white")
+    table.add_column("Findings", style="yellow")
+    table.add_column("Patches", style="green")
+    table.add_column("PR", style="magenta")
+    table.add_column("Timestamp", style="dim")
+
+    for j in jobs[:15]:
+        pr_cell = j.github_result.pr_url if j.github_result and j.github_result.pr_url else "-"
+        table.add_row(
+            j.job_id,
+            j.status.value.upper(),
+            ", ".join(j.source_files[:2]),
+            str(len(j.findings)),
+            str(len(j.patches)),
+            pr_cell,
+            j.created_at[:19].replace("T", " ")
+        )
+    console.print(table)
+
+
+@app.command("job")
+def job_status_cmd(
+    job_id: str = typer.Argument(..., help="Job ID to inspect"),
+):
+    """View detailed telemetry, findings, patches, and PR status for a specific job."""
+    from mnemosyne.automation.engine import AutomationEngine
+    from mnemosyne.automation.reporter import AutomationReporter
+
+    root = find_project_root()
+    engine = AutomationEngine(root)
+    job = engine.get_job(job_id)
+    if not job:
+        console.print(f"[red]Error: Job {job_id} not found.[/red]")
+        raise typer.Exit(code=1)
+
+    console.print(AutomationReporter.format_console_text(job))
 
 
 if __name__ == "__main__":
