@@ -22,7 +22,7 @@
     },
     "timestamp": "2026-07-10T19:26:58.958247+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_bug_d2508f28",
@@ -47,7 +47,7 @@
     },
     "timestamp": "2026-07-10T19:27:00.917106+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_bug_c150cc4a",
@@ -72,7 +72,7 @@
     },
     "timestamp": "2026-07-10T19:27:04.097797+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_bug_c30fc445",
@@ -97,7 +97,7 @@
     },
     "timestamp": "2026-07-10T19:27:08.118922+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_bug_21cc753a",
@@ -122,7 +122,7 @@
     },
     "timestamp": "2026-07-10T19:27:45.344343+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_bug_ad6f202d",
@@ -147,7 +147,7 @@
     },
     "timestamp": "2026-07-10T19:28:41.054227+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_bug_dd73cf7c",
@@ -172,7 +172,7 @@
     },
     "timestamp": "2026-07-10T19:28:47.216500+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_commit_0a27358",
@@ -443,7 +443,7 @@
     },
     "timestamp": "2026-07-10T19:58:07.028970+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "rule_41f2fec4",
@@ -555,7 +555,7 @@
     },
     "timestamp": "2026-07-10T20:08:08.178995+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "rule_12642768",
@@ -639,7 +639,7 @@
     },
     "timestamp": "2026-07-10T20:08:08.187703+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "rule_2ca94726",
@@ -739,7 +739,7 @@
     },
     "timestamp": "2026-11-22T17:25:46.363734+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "mem_bug_cba89d02",
@@ -763,7 +763,7 @@
     },
     "timestamp": "2026-11-22T17:25:46.365861+00:00",
     "active": true,
-    "search_strategy": null
+    "search_strategy": "KEYWORD_FALLBACK"
   },
   {
     "id": "rule_9a7ec105",
@@ -810,6 +810,102 @@
       "timestamp": "2026-11-22T17:25:46.365861+00:00"
     },
     "timestamp": "2026-11-22T17:25:46.365861+00:00",
+    "active": true,
+    "search_strategy": "KEYWORD_FALLBACK"
+  },
+  {
+    "id": "mem_bug_13d1b105",
+    "memory_type": "bug_fix",
+    "title": "Auto-fixed: Security Vulnerability in bug_03_unsafe_eval.py",
+    "content": "[BUG FIX] Auto-fixed: Security Vulnerability in bug_03_unsafe_eval.py\nFile: bug_03_unsafe_eval.py\nRoot Cause: Detected dangerous execution function call on line 5.\nFix Applied: Applied verified automated patch\nTags: autofix, sec-eval()-execution\n",
+    "file_path": "bug_03_unsafe_eval.py",
+    "metadata": {
+      "id": "mem_bug_13d1b105",
+      "file_path": "bug_03_unsafe_eval.py",
+      "function_name": null,
+      "title": "Auto-fixed: Security Vulnerability in bug_03_unsafe_eval.py",
+      "root_cause": "Detected dangerous execution function call on line 5.",
+      "fix_description": "Applied verified automated patch",
+      "severity": "high",
+      "tags": [
+        "autofix",
+        "sec-eval()-execution"
+      ],
+      "timestamp": "2026-11-23T10:51:44.679060+00:00"
+    },
+    "timestamp": "2026-11-23T10:51:44.679060+00:00",
+    "active": true,
+    "search_strategy": null
+  },
+  {
+    "id": "mem_bug_722232d5",
+    "memory_type": "bug_fix",
+    "title": "Auto-fixed: Security Vulnerability in bug_03_unsafe_eval.py",
+    "content": "[BUG FIX] Auto-fixed: Security Vulnerability in bug_03_unsafe_eval.py\nFile: bug_03_unsafe_eval.py\nRoot Cause: Detected a potential hardcoded credential assignment on line 10.\nFix Applied: Applied verified automated patch\nTags: autofix, sec-hardcoded-secret-/-api-key\n",
+    "file_path": "bug_03_unsafe_eval.py",
+    "metadata": {
+      "id": "mem_bug_722232d5",
+      "file_path": "bug_03_unsafe_eval.py",
+      "function_name": null,
+      "title": "Auto-fixed: Security Vulnerability in bug_03_unsafe_eval.py",
+      "root_cause": "Detected a potential hardcoded credential assignment on line 10.",
+      "fix_description": "Applied verified automated patch",
+      "severity": "high",
+      "tags": [
+        "autofix",
+        "sec-hardcoded-secret-/-api-key"
+      ],
+      "timestamp": "2026-11-23T10:51:44.679060+00:00"
+    },
+    "timestamp": "2026-11-23T10:51:44.679060+00:00",
+    "active": true,
+    "search_strategy": null
+  },
+  {
+    "id": "rule_8b6600a0",
+    "memory_type": "rule",
+    "title": "Apply defensive programming at service boundaries",
+    "content": "[CONSOLIDATED RULE] Apply defensive programming at service boundaries\nDomain: general\nRule: Assume external calls can fail or return unexpected types. Add explicit error handling at all integration points.\nObserved in files: bug_03_unsafe_eval.py\nConfidence: 0.73\n",
+    "file_path": null,
+    "metadata": {
+      "id": "rule_8b6600a0",
+      "rule_title": "Apply defensive programming at service boundaries",
+      "description": "Assume external calls can fail or return unexpected types. Add explicit error handling at all integration points.",
+      "domain": "general",
+      "origin_memory_ids": [
+        "mem_bug_13d1b105"
+      ],
+      "provenance_files": [
+        "bug_03_unsafe_eval.py"
+      ],
+      "confidence": 0.73,
+      "timestamp": "2026-11-23T10:51:44.679060+00:00"
+    },
+    "timestamp": "2026-11-23T10:51:44.679060+00:00",
+    "active": true,
+    "search_strategy": null
+  },
+  {
+    "id": "mem_bug_2b463001",
+    "memory_type": "bug_fix",
+    "title": "Auto-fixed: Code Cleanliness in bug_03_unsafe_eval.py",
+    "content": "[BUG FIX] Auto-fixed: Code Cleanliness in bug_03_unsafe_eval.py\nFile: bug_03_unsafe_eval.py\nRoot Cause: Imported 'os' is never used in file.\nFix Applied: Applied deterministic safety transformation\nTags: autofix, py-unused-import\n",
+    "file_path": "bug_03_unsafe_eval.py",
+    "metadata": {
+      "id": "mem_bug_2b463001",
+      "file_path": "bug_03_unsafe_eval.py",
+      "function_name": null,
+      "title": "Auto-fixed: Code Cleanliness in bug_03_unsafe_eval.py",
+      "root_cause": "Imported 'os' is never used in file.",
+      "fix_description": "Applied deterministic safety transformation",
+      "severity": "low",
+      "tags": [
+        "autofix",
+        "py-unused-import"
+      ],
+      "timestamp": "2026-11-23T10:51:44.679060+00:00"
+    },
+    "timestamp": "2026-11-23T10:51:44.679060+00:00",
     "active": true,
     "search_strategy": null
   }

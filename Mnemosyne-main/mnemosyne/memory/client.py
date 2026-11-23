@@ -642,3 +642,7 @@ class MemoryClient:
 
     def get_all_active(self) -> List[MemoryRecord]:
         return list(self._records.values())
+
+    def get_memory(self, memory_id: str) -> Optional[MemoryRecord]:
+        """Retrieve a specific memory record by its ID."""
+        return self._records.get(memory_id)

@@ -82,6 +82,10 @@ class PatchDiff(BaseModel):
     is_safe: bool = True
     fix_type: str = "deterministic"  # deterministic | ai_patch | historical_pattern
 
+    @property
+    def diff(self) -> str:
+        return self.diff_unified
+
 
 class VerificationResult(BaseModel):
     model_config = ConfigDict(extra="ignore")

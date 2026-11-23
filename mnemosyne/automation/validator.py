@@ -8,6 +8,7 @@ Enforces verification gates:
 5. Executes bounded retries with diagnostic feedback
 6. Automatically rolls back failed or unsafe patches
 """
+import sys
 import ast
 import json
 import logging
@@ -83,14 +84,20 @@ class VerificationEngine:
         new_findings = self.scanner.scan_code(content, file_path)
         result.new_findings = new_findings
 
-        original_ids = {f.finding_id for f in original_findings}
-        original_rules = {(f.rule_id, f.line_number) for f in original_findings}
-        remaining_rules = {(f.rule_id, f.line_number) for f in new_findings}
+        # Compare defects by rule_id rather than brittle line numbers which shift after edits
+        orig_rule_counts = {}
+        for f in original_findings:
+            orig_rule_counts[f.rule_id] = orig_rule_counts.get(f.rule_id, 0) + 1
+
+        new_rule_counts = {}
+        for f in new_findings:
+            new_rule_counts[f.rule_id] = new_rule_counts.get(f.rule_id, 0) + 1
 
         resolved_ids = []
         for orig in original_findings:
-            if (orig.rule_id, orig.line_number) not in remaining_rules:
+            if orig.rule_id not in new_rule_counts or new_rule_counts.get(orig.rule_id, 0) < orig_rule_counts.get(orig.rule_id, 0):
                 resolved_ids.append(orig.finding_id)
+                orig_rule_counts[orig.rule_id] = orig_rule_counts.get(orig.rule_id, 1) - 1
 
         result.resolved_finding_ids = resolved_ids
         result.remaining_finding_ids = [orig.finding_id for orig in original_findings if orig.finding_id not in resolved_ids]
@@ -99,15 +106,15 @@ class VerificationEngine:
         blocking_findings = [f for f in new_findings if f.severity in (Severity.CRITICAL, Severity.HIGH)]
         result.security_clean = len(blocking_findings) == 0
 
-        # Check for new regressions (findings not in original set)
+        # Check for brand new regressions (rules not present in original findings)
         regressions = [
             f for f in new_findings
-            if (f.rule_id, f.line_number) not in original_rules
+            if f.rule_id not in {orig.rule_id for orig in original_findings}
         ]
 
         if regressions:
             result.status = VerificationStatus.REGRESSION
-            result.message = f"Patch introduced {len(regressions)} new regression finding(s)."
+            result.message = f"Patch introduced {len(regressions)} new regression finding(s): {', '.join(f.rule_id for f in regressions)}."
             self.workspace.rollback(file_path)
             return result
 
@@ -154,7 +161,7 @@ class VerificationEngine:
         try:
             # Run pytest on the repo with short timeout
             proc = subprocess.run(
-                ["python", "-m", "pytest", "-q"],
+                [sys.executable, "-m", "pytest", "-q", "--import-mode=importlib", "tests"],
                 cwd=str(self.repo_root),
                 capture_output=True,
                 text=True,

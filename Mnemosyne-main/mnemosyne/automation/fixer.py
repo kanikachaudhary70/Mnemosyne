@@ -6,6 +6,7 @@ Implements the 3-step hierarchical bug correction pipeline:
 3. AI-assisted patch generation via Ollama/LLM with strict bounds and validation
 Preserves original code, generates unified diffs, and isolates changes in WorkspaceManager.
 """
+import os
 import re
 import ast
 import json
@@ -131,6 +132,47 @@ class AutoFixEngine:
             if lines_to_remove:
                 lines = [line for idx, line in enumerate(lines) if idx not in lines_to_remove]
 
+        # 4. Fix unsafe eval() execution -> ast.literal_eval()
+        eval_findings = [f for f in findings if "EVAL" in (f.rule_id or "").upper()]
+        if eval_findings:
+            new_lines = []
+            has_ast = any("import ast" in l for l in lines)
+            eval_modified = False
+            for line in lines:
+                if "eval(" in line and "literal_eval" not in line and "def eval" not in line:
+                    fixed_l = line.replace("eval(", "ast.literal_eval(")
+                    new_lines.append(fixed_l)
+                    eval_modified = True
+                    applied.append("Replaced unsafe eval() with ast.literal_eval()")
+                else:
+                    new_lines.append(line)
+            if eval_modified:
+                lines = new_lines
+                if not has_ast:
+                    lines.insert(0, "import ast\n")
+
+        # 5. Fix hardcoded secrets pattern: key = "..." -> key = os.getenv("...", "")
+        secret_findings = [f for f in findings if "SECRET" in (f.rule_id or "").upper() or "KEY" in (f.rule_id or "").upper()]
+        if secret_findings:
+            new_lines = []
+            has_os = any("import os" in l for l in lines)
+            secret_modified = False
+            for line in lines:
+                sec_match = re.match(r'^(\s*)([A-Za-z0-9_]*(?:key|secret|token|password)[A-Za-z0-9_]*)\s*=\s*["\']([^"\']{6,})["\']\s*(#.*)?$', line, re.IGNORECASE)
+                if sec_match:
+                    indent = sec_match.group(1)
+                    var_name = sec_match.group(2)
+                    env_name = var_name.upper()
+                    new_lines.append(f'{indent}{var_name} = os.getenv("{env_name}", "")  # Mitigated: loaded from env\n')
+                    secret_modified = True
+                    applied.append(f"Replaced hardcoded {var_name} with os.getenv")
+                else:
+                    new_lines.append(line)
+            if secret_modified:
+                lines = new_lines
+                if not has_os:
+                    lines.insert(0, "import os\n")
+
         return "".join(lines), applied
 
     # -------------------------------------------------------------------------
@@ -138,21 +180,35 @@ class AutoFixEngine:
     # -------------------------------------------------------------------------
     def _apply_historical_fixes(self, content: str, findings: List[ScanFinding], file_path: str) -> Tuple[str, List[str]]:
         applied = []
+        if not self.memory_client:
+            return content, applied
+
         # Query past memories linked to these findings
         for f in findings:
             if not f.matching_memory_ids:
                 continue
             for mem_id in f.matching_memory_ids:
-                rec = self.memory_client.get_memory(mem_id)
-                if not rec:
-                    continue
-                # If memory has exact root cause & fix pattern, see if applicable
-                fix_desc = rec.metadata.get("fix_description", "")
-                if "replace shell=True" in fix_desc.lower() or "shell=false" in fix_desc.lower():
-                    if "shell=True" in content:
-                        content = content.replace("shell=True", "shell=False")
-                        f.applied_fix = f"Applied historical pattern from {mem_id}"
-                        applied.append(mem_id)
+                try:
+                    rec = None
+                    if hasattr(self.memory_client, "get_memory"):
+                        rec = self.memory_client.get_memory(mem_id)
+                    elif hasattr(self.memory_client, "_records"):
+                        rec = self.memory_client._records.get(mem_id)
+
+                    if not rec:
+                        continue
+
+                    # If memory has exact root cause & fix pattern, see if applicable
+                    meta = getattr(rec, "metadata", {}) or {}
+                    fix_desc = meta.get("fix_description", "")
+                    if "replace shell=True" in fix_desc.lower() or "shell=false" in fix_desc.lower():
+                        if "shell=True" in content:
+                            content = content.replace("shell=True", "shell=False")
+                            f.applied_fix = f"Applied historical pattern from {mem_id}"
+                            applied.append(mem_id)
+                except Exception as e:
+                    logger.debug(f"Failed to query historical fix for {mem_id}: {e}")
+
         return content, applied
 
     # -------------------------------------------------------------------------
